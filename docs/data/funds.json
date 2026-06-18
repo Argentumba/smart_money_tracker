@@ -1,0 +1,33 @@
+{
+  "generated": "2026-06-18T14:27:11.094591+00:00",
+  "my_portfolio": [
+    "AMKBY",
+    "CLSK",
+    "CIG",
+    "GNL",
+    "HAL",
+    "HUT",
+    "KEEL",
+    "KC",
+    "NBIS",
+    "NEM",
+    "PSTL",
+    "RIOT",
+    "CLM",
+    "KWEB"
+  ],
+  "funds": {
+    "Berkshire Hathaway": {
+      "error": "'utf-8' codec can't decode byte 0x8b in position 1: invalid start byte"
+    },
+    "Bridgewater": {
+      "error": "'utf-8' codec can't decode byte 0x8b in position 1: invalid start byte"
+    },
+    "Whale Rock": {
+      "error": "'utf-8' codec can't decode byte 0x8b in position 1: invalid start byte"
+    },
+    "Octahedron": {
+      "error": "'utf-8' codec can't decode byte 0x8b in position 1: invalid start byte"
+    }
+  }
+}
