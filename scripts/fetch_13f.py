@@ -10,6 +10,7 @@ SEC требует: User-Agent с контактом + не более 10 зап
 import json
 import time
 import re
+import gzip
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
@@ -35,7 +36,6 @@ MY_PORTFOLIO = ["AMKBY","CLSK","CIG","GNL","HAL","HUT","KEEL","KC",
 
 HEADERS = {
     "User-Agent": f"smart-money-dashboard/1.0 ({SEC_CONTACT})",
-    "Accept-Encoding": "gzip, deflate",
 }
 OUT = Path(__file__).resolve().parent.parent / "docs" / "data"
 OUT.mkdir(parents=True, exist_ok=True)
@@ -45,9 +45,15 @@ def get(url, is_json=False):
     """GET с дросселированием под лимиты SEC."""
     req = urllib.request.Request(url, headers=HEADERS)
     with urllib.request.urlopen(req, timeout=30) as r:
-        data = r.read()
+        raw = r.read()
+        content_encoding = r.headers.get("Content-Encoding", "")
     time.sleep(0.25)  # < 10 req/sec с запасом
-    return json.loads(data) if is_json else data.decode("utf-8", "ignore")
+    # Декомпрессия на случай, если сервер всё равно вернул gzip
+    if content_encoding == "gzip" or (raw[:2] == b"\x1f\x8b"):
+        raw = gzip.decompress(raw)
+    if is_json:
+        return json.loads(raw.decode("utf-8"))
+    return raw.decode("utf-8", "ignore")
 
 
 def latest_13f_filings(cik, n=2):
@@ -105,7 +111,6 @@ def parse_info_table(xml_text):
             shares = int(float(shares))
         except ValueError:
             continue
-        # SEC после 2022 пишет value в долларах; раньше в тысячах. Нормализуем эвристикой.
         key = cusip or issuer
         holdings[key]["issuer"] = issuer
         holdings[key]["cusip"] = cusip
@@ -191,7 +196,9 @@ def main():
             }
             print(f"  ✓ {len(current)} позиций, отчёт {filings[0]['report_date']}")
         except Exception as e:
+            import traceback
             print(f"  ✗ ошибка: {e}")
+            traceback.print_exc()
             result["funds"][name] = {"error": str(e)}
     (OUT / "funds.json").write_text(json.dumps(result, ensure_ascii=False, indent=2))
     print(f"\n✓ Сохранено в {OUT/'funds.json'}")
