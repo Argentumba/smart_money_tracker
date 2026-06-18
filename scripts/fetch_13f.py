@@ -92,13 +92,16 @@ def find_info_table(cik, accession):
 
 def parse_info_table(xml_text):
     """Парсит holdings из 13F information table XML."""
-    # убираем namespace для простоты
-    xml_text = re.sub(r'xmlns(:\w+)?="[^"]+"', "", xml_text)
-    xml_text = re.sub(r'<(/?)\w+:', r'<\1', xml_text)
+    # Убираем namespace: сначала prefixed-атрибуты (xsi:schemaLocation etc),
+    # потом xmlns-декларации, потом префиксы тегов (n1:infoTable → infoTable)
+    xml_text = re.sub(r'\s+\w+:\w+="[^"]*"', " ", xml_text)  # xsi:attr="..." → удалить
+    xml_text = re.sub(r'xmlns(:\w+)?="[^"]+"', "", xml_text)  # xmlns declarations
+    xml_text = re.sub(r'<(/?)\w+:', r'<\1', xml_text)         # <n1:tag> → <tag>
     holdings = defaultdict(lambda: {"shares": 0, "value": 0})
     try:
         root = ET.fromstring(xml_text)
-    except ET.ParseError:
+    except ET.ParseError as e:
+        print(f"  XML ParseError: {e}")
         return {}
     for it in root.iter("infoTable"):
         issuer = (it.findtext("nameOfIssuer") or "").strip()
