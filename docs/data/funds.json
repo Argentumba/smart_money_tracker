@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-18T14:27:11.094591+00:00",
+  "generated": "2026-06-18T14:48:19.540368+00:00",
   "my_portfolio": [
     "AMKBY",
     "CLSK",
@@ -18,16 +18,596 @@
   ],
   "funds": {
     "Berkshire Hathaway": {
-      "error": "'utf-8' codec can't decode byte 0x8b in position 1: invalid start byte"
+      "cik": "0001067983",
+      "report_date": "2026-03-31",
+      "filing_date": "2026-05-15",
+      "total_value": 263095703570,
+      "positions": 29,
+      "top_holdings": [
+        {
+          "issuer": "APPLE INC",
+          "value": 57843260493,
+          "pct": 21.99
+        },
+        {
+          "issuer": "AMERICAN EXPRESS CO",
+          "value": 45859204536,
+          "pct": 17.43
+        },
+        {
+          "issuer": "COCA COLA CO",
+          "value": 30420000000,
+          "pct": 11.56
+        },
+        {
+          "issuer": "BANK AMERICA CORP",
+          "value": 25039178044,
+          "pct": 9.52
+        },
+        {
+          "issuer": "CHEVRON CORPORATION",
+          "value": 17457364606,
+          "pct": 6.64
+        },
+        {
+          "issuer": "OCCIDENTAL PETE CORP",
+          "value": 17221193015,
+          "pct": 6.55
+        },
+        {
+          "issuer": "ALPHABET INC",
+          "value": 15600071913,
+          "pct": 5.93
+        },
+        {
+          "issuer": "CHUBB LTD SWITZ",
+          "value": 11162836215,
+          "pct": 4.24
+        },
+        {
+          "issuer": "MOODYS CORP",
+          "value": 10762190653,
+          "pct": 4.09
+        },
+        {
+          "issuer": "KRAFT HEINZ CO",
+          "value": 7323527057,
+          "pct": 2.78
+        }
+      ],
+      "moves": {
+        "new": [
+          {
+            "issuer": "DELTA AIR LINES INC",
+            "value": 2646532635,
+            "shares": 39809456
+          },
+          {
+            "issuer": "ALPHABET INC",
+            "value": 1028454775,
+            "shares": 3585215
+          },
+          {
+            "issuer": "MACYS INC",
+            "value": 54963842,
+            "shares": 3038355
+          }
+        ],
+        "increased": [
+          {
+            "issuer": "ALPHABET INC",
+            "value": 15600071913,
+            "pct": 204
+          },
+          {
+            "issuer": "NEW YORK TIMES CO MTN BE",
+            "value": 1268219376,
+            "pct": 199
+          },
+          {
+            "issuer": "LENNAR CORP",
+            "value": 877052911,
+            "pct": 43
+          },
+          {
+            "issuer": "LENNAR CORP",
+            "value": 19995576,
+            "pct": 31
+          }
+        ],
+        "decreased": [
+          {
+            "issuer": "CHEVRON CORPORATION",
+            "value": 17457364606,
+            "pct": -35
+          },
+          {
+            "issuer": "DAVITA INC",
+            "value": 4626158909,
+            "pct": -5
+          },
+          {
+            "issuer": "NUCOR CORP",
+            "value": 660686383,
+            "pct": -39
+          },
+          {
+            "issuer": "CONSTELLATION BRANDS INC",
+            "value": 94933500,
+            "pct": -95
+          }
+        ],
+        "exited": [
+          {
+            "issuer": "VISA INC",
+            "value": 2910002197
+          },
+          {
+            "issuer": "MASTERCARD INCORPORATED",
+            "value": 2275897610
+          },
+          {
+            "issuer": "UNITEDHEALTH GROUP INC",
+            "value": 1663610472
+          },
+          {
+            "issuer": "DOMINOS PIZZA INC",
+            "value": 1396347000
+          },
+          {
+            "issuer": "AON PLC",
+            "value": 1271424876
+          },
+          {
+            "issuer": "POOL CORP",
+            "value": 702007444
+          },
+          {
+            "issuer": "AMAZON COM INC",
+            "value": 525346320
+          },
+          {
+            "issuer": "HEICO CORP NEW",
+            "value": 326798907
+          },
+          {
+            "issuer": "LIBERTY MEDIA CORP DEL",
+            "value": 297357853
+          },
+          {
+            "issuer": "CHARTER COMMUNICATIONS INC N",
+            "value": 221459118
+          },
+          {
+            "issuer": "LAMAR ADVERTISING CO NEW",
+            "value": 152201058
+          },
+          {
+            "issuer": "ALLEGION PLC",
+            "value": 124212776
+          },
+          {
+            "issuer": "DIAGEO PLC",
+            "value": 19647993
+          },
+          {
+            "issuer": "LIBERTY LATIN AMERICA LTD",
+            "value": 17711354
+          },
+          {
+            "issuer": "LIBERTY LATIN AMERICA LTD",
+            "value": 9578789
+          }
+        ]
+      }
     },
     "Bridgewater": {
-      "error": "'utf-8' codec can't decode byte 0x8b in position 1: invalid start byte"
+      "cik": "0001350694",
+      "report_date": "2026-03-31",
+      "filing_date": "2026-05-15",
+      "total_value": 22404547213,
+      "positions": 993,
+      "top_holdings": [
+        {
+          "issuer": "STATE STR SPDR S&P 500 ETF T",
+          "value": 2838644353,
+          "pct": 12.67
+        },
+        {
+          "issuer": "ISHARES TR",
+          "value": 1750004460,
+          "pct": 7.81
+        },
+        {
+          "issuer": "AMAZON COM INC",
+          "value": 914036840,
+          "pct": 4.08
+        },
+        {
+          "issuer": "NVIDIA CORPORATION",
+          "value": 818459723,
+          "pct": 3.65
+        },
+        {
+          "issuer": "ALPHABET INC",
+          "value": 574451135,
+          "pct": 2.56
+        },
+        {
+          "issuer": "BROADCOM INC",
+          "value": 568068464,
+          "pct": 2.54
+        },
+        {
+          "issuer": "MICRON TECHNOLOGY INC",
+          "value": 498551839,
+          "pct": 2.23
+        },
+        {
+          "issuer": "MICROSOFT CORP",
+          "value": 401626676,
+          "pct": 1.79
+        },
+        {
+          "issuer": "GE VERNOVA INC",
+          "value": 379621591,
+          "pct": 1.69
+        },
+        {
+          "issuer": "TAIWAN SEMICONDUCTOR MANUFAC",
+          "value": 363998848,
+          "pct": 1.62
+        }
+      ],
+      "moves": {
+        "new": [
+          {
+            "issuer": "TAIWAN SEMICONDUCTOR MANUFAC",
+            "value": 363998848,
+            "shares": 1077079
+          },
+          {
+            "issuer": "ALPHABET INC",
+            "value": 111015394,
+            "shares": 387002
+          },
+          {
+            "issuer": "NUCOR CORP",
+            "value": 104593085,
+            "shares": 618528
+          },
+          {
+            "issuer": "PACCAR INC",
+            "value": 89751816,
+            "shares": 777072
+          },
+          {
+            "issuer": "ISHARES INC",
+            "value": 84345545,
+            "shares": 1072280
+          },
+          {
+            "issuer": "SYNOPSYS INC",
+            "value": 82607797,
+            "shares": 208353
+          },
+          {
+            "issuer": "TOWER SEMICONDUCTOR LTD",
+            "value": 81198983,
+            "shares": 462725
+          },
+          {
+            "issuer": "STEEL DYNAMICS INC",
+            "value": 78854220,
+            "shares": 438079
+          },
+          {
+            "issuer": "INSMED INC",
+            "value": 48333078,
+            "shares": 295579
+          },
+          {
+            "issuer": "ASE TECHNOLOGY HLDG CO LTD",
+            "value": 33557583,
+            "shares": 1547859
+          },
+          {
+            "issuer": "COREWEAVE INC",
+            "value": 28201017,
+            "shares": 364025
+          },
+          {
+            "issuer": "PETROLEO BRASILEIRO S A",
+            "value": 23882918,
+            "shares": 1150984
+          },
+          {
+            "issuer": "KENNAMETAL INC",
+            "value": 23094115,
+            "shares": 639195
+          },
+          {
+            "issuer": "APPLIED OPTOELECTRONICS INC",
+            "value": 18942662,
+            "shares": 223935
+          },
+          {
+            "issuer": "EMERSON ELEC CO",
+            "value": 17553142,
+            "shares": 133973
+          }
+        ],
+        "increased": [
+          {
+            "issuer": "AMAZON COM INC",
+            "value": 914036840,
+            "pct": 125
+          },
+          {
+            "issuer": "NVIDIA CORPORATION",
+            "value": 818459723,
+            "pct": 21
+          },
+          {
+            "issuer": "ALPHABET INC",
+            "value": 574451135,
+            "pct": 26
+          },
+          {
+            "issuer": "BROADCOM INC",
+            "value": 568068464,
+            "pct": 57
+          },
+          {
+            "issuer": "MICRON TECHNOLOGY INC",
+            "value": 498551839,
+            "pct": 66
+          },
+          {
+            "issuer": "MICROSOFT CORP",
+            "value": 401626676,
+            "pct": 10
+          },
+          {
+            "issuer": "MARVELL TECHNOLOGY INC",
+            "value": 193043200,
+            "pct": 97
+          },
+          {
+            "issuer": "APPLIED MATLS INC",
+            "value": 191374373,
+            "pct": 17
+          },
+          {
+            "issuer": "META PLATFORMS INC",
+            "value": 166870296,
+            "pct": 30
+          },
+          {
+            "issuer": "KLA CORP",
+            "value": 160012684,
+            "pct": 39
+          },
+          {
+            "issuer": "CELESTICA INC",
+            "value": 148056923,
+            "pct": 54
+          },
+          {
+            "issuer": "APPLE INC",
+            "value": 143008635,
+            "pct": 95
+          },
+          {
+            "issuer": "UNION PAC CORP",
+            "value": 129280067,
+            "pct": 878
+          },
+          {
+            "issuer": "SEAGATE TECHNOLOGY HLDNGS PL",
+            "value": 128934876,
+            "pct": 18
+          },
+          {
+            "issuer": "BARRICK MNG CORP",
+            "value": 125599704,
+            "pct": 24
+          }
+        ],
+        "decreased": [
+          {
+            "issuer": "ISHARES TR",
+            "value": 1750004460,
+            "pct": -36
+          },
+          {
+            "issuer": "GE VERNOVA INC",
+            "value": 379621591,
+            "pct": -35
+          },
+          {
+            "issuer": "LAM RESEARCH CORP",
+            "value": 335708788,
+            "pct": -48
+          },
+          {
+            "issuer": "ADVANCED MICRO DEVICES INC",
+            "value": 262987591,
+            "pct": -22
+          },
+          {
+            "issuer": "ORACLE CORP",
+            "value": 234209271,
+            "pct": -15
+          },
+          {
+            "issuer": "ISHARES INC",
+            "value": 217268135,
+            "pct": -15
+          },
+          {
+            "issuer": "JOHNSON & JOHNSON",
+            "value": 170346325,
+            "pct": -47
+          },
+          {
+            "issuer": "ALTRIA GROUP INC",
+            "value": 112546671,
+            "pct": -48
+          },
+          {
+            "issuer": "SEA LTD",
+            "value": 110810380,
+            "pct": -13
+          },
+          {
+            "issuer": "HCA HEALTHCARE INC",
+            "value": 82249585,
+            "pct": -47
+          },
+          {
+            "issuer": "WELLS FARGO & CO",
+            "value": 75038794,
+            "pct": -17
+          },
+          {
+            "issuer": "MANULIFE FINL CORP",
+            "value": 72577845,
+            "pct": -17
+          },
+          {
+            "issuer": "TE CONNECTIVITY PLC",
+            "value": 70267089,
+            "pct": -24
+          },
+          {
+            "issuer": "VALE S A",
+            "value": 63420903,
+            "pct": -34
+          },
+          {
+            "issuer": "THE CIGNA GROUP",
+            "value": 60950508,
+            "pct": -34
+          }
+        ],
+        "exited": [
+          {
+            "issuer": "SALESFORCE INC",
+            "value": 511823604
+          },
+          {
+            "issuer": "WORKDAY INC",
+            "value": 207287829
+          },
+          {
+            "issuer": "SERVICENOW INC",
+            "value": 205103793
+          },
+          {
+            "issuer": "GLOBAL PMTS INC",
+            "value": 74155392
+          },
+          {
+            "issuer": "GODADDY INC",
+            "value": 70467017
+          },
+          {
+            "issuer": "MATCH GROUP INC NEW",
+            "value": 69174770
+          },
+          {
+            "issuer": "AUTODESK INC",
+            "value": 54524746
+          },
+          {
+            "issuer": "WEBSTER FINL CORP",
+            "value": 47461229
+          },
+          {
+            "issuer": "DEVON ENERGY CORP NEW",
+            "value": 42889371
+          },
+          {
+            "issuer": "LPL FINL HLDGS INC",
+            "value": 42251068
+          },
+          {
+            "issuer": "MAPLEBEAR INC",
+            "value": 41274548
+          },
+          {
+            "issuer": "CAPITAL ONE FINL CORP",
+            "value": 38238107
+          },
+          {
+            "issuer": "MONDAY COM LTD",
+            "value": 35294286
+          },
+          {
+            "issuer": "MERCK & CO INC",
+            "value": 32653862
+          },
+          {
+            "issuer": "CORPAY INC",
+            "value": 30290711
+          }
+        ]
+      }
     },
     "Whale Rock": {
-      "error": "'utf-8' codec can't decode byte 0x8b in position 1: invalid start byte"
+      "cik": "0001387322",
+      "report_date": "2026-03-31",
+      "filing_date": "2026-05-15",
+      "total_value": 0,
+      "positions": 0,
+      "top_holdings": [],
+      "moves": {
+        "new": [],
+        "increased": [],
+        "decreased": [],
+        "exited": []
+      }
     },
     "Octahedron": {
-      "error": "'utf-8' codec can't decode byte 0x8b in position 1: invalid start byte"
+      "cik": "0001767640",
+      "report_date": "2026-03-31",
+      "filing_date": "2026-05-15",
+      "total_value": 12005605739,
+      "positions": 4,
+      "top_holdings": [
+        {
+          "issuer": "UBER TECHNOLOGIES INC",
+          "value": 5239420114,
+          "pct": 43.64
+        },
+        {
+          "issuer": "ELECTRONIC ARTS INC",
+          "value": 5057593097,
+          "pct": 42.13
+        },
+        {
+          "issuer": "LUCID GROUP INC",
+          "value": 1687656903,
+          "pct": 14.06
+        },
+        {
+          "issuer": "CLARITEV CORPORATION",
+          "value": 20935625,
+          "pct": 0.17
+        }
+      ],
+      "moves": {
+        "new": [],
+        "increased": [],
+        "decreased": [],
+        "exited": [
+          {
+            "issuer": "ALLURION TECHNOLOGIES INC",
+            "value": 17571
+          }
+        ]
+      }
     }
   }
 }
