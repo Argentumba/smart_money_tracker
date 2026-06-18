@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Money Dashboard</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
+  :root{--bg:#0a0c10;--panel:#12151c;--panel2:#171b24;--border:#232936;--lime:#c4f042;--green:#34d399;--red:#f87171;--amber:#fbbf24;--blue:#60a5fa;--text:#e8ebf2;--muted:#6b7280;--dim:#9ca3af;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Manrope',sans-serif;font-size:14px;line-height:1.5;}
+  .wrap{max-width:980px;margin:0 auto;padding:40px 18px 80px;}
+  .top .badge{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--lime);text-transform:uppercase;margin-bottom:8px;}
+  .top h1{font-size:clamp(26px,5vw,40px);font-weight:800;line-height:1.05;}
+  .top h1 span{color:var(--lime);}
+  .top .sub{color:var(--dim);font-size:13px;margin-top:8px;max-width:640px;line-height:1.6;}
+  .meta-bar{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin:14px 0 4px;display:flex;gap:16px;flex-wrap:wrap;}
+  .meta-bar b{color:var(--lime);}
+  .warn{background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.25);border-radius:8px;padding:12px 16px;margin:18px 0 28px;font-size:12px;color:var(--amber);line-height:1.6;font-family:'JetBrains Mono',monospace;}
+  .warn b{display:block;font-size:10px;letter-spacing:1px;opacity:0.7;margin-bottom:4px;}
+  .tabs{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;}
+  .tab{font-family:'JetBrains Mono',monospace;font-size:11px;padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--panel);color:var(--muted);cursor:pointer;transition:all .15s;user-select:none;}
+  .tab:hover{color:var(--text);border-color:var(--muted);}
+  .tab.active{background:var(--lime);color:#0a0c10;border-color:var(--lime);font-weight:700;}
+  .view{display:none;}
+  .view.active{display:block;animation:fade .3s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  .lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:28px 0 12px;display:flex;align-items:center;gap:10px;}
+  .lbl::after{content:'';flex:1;height:1px;background:var(--border);}
+  .signal{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:10px;border-left:4px solid var(--border);}
+  .signal.match{border-left-color:var(--green);}
+  .signal.conflict{border-left-color:var(--red);}
+  .signal.idea{border-left-color:var(--blue);}
+  .signal-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
+  .signal-ticker{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;}
+  .signal-tag{font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 8px;border-radius:4px;font-weight:700;}
+  .t-match{background:rgba(52,211,153,.12);color:var(--green);}
+  .t-conflict{background:rgba(248,113,113,.12);color:var(--red);}
+  .t-idea{background:rgba(96,165,250,.12);color:var(--blue);}
+  .signal-body{font-size:13px;color:var(--dim);line-height:1.6;}
+  .signal-body b{color:var(--text);}
+  .fund-block{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:14px;}
+  .fund-name{font-size:17px;font-weight:800;}
+  .fund-meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin:2px 0 16px;}
+  .moves-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:560px){.moves-grid{grid-template-columns:1fr;}}
+  .moves-col h4{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;margin-bottom:8px;text-transform:uppercase;}
+  .moves-col.in h4{color:var(--green);}
+  .moves-col.out h4{color:var(--red);}
+  .move-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(35,41,54,.6);font-size:13px;gap:8px;}
+  .move-row:last-child{border-bottom:none;}
+  .move-row .tk{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .move-row .det{font-size:11px;color:var(--muted);white-space:nowrap;}
+  .th-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(35,41,54,.5);font-size:13px;}
+  .th-row .p{font-family:'JetBrains Mono',monospace;color:var(--lime);}
+  .loading{text-align:center;color:var(--muted);padding:60px 0;font-family:'JetBrains Mono',monospace;}
+  .err{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.3);border-radius:8px;padding:16px;color:var(--red);font-size:13px;font-family:'JetBrains Mono',monospace;}
+  footer{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);border-top:1px solid var(--border);padding-top:18px;margin-top:36px;line-height:1.9;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="badge">Smart Money · Авто-обновление · SEC EDGAR</div>
+    <h1>Куда зашли <span>умные деньги</span></h1>
+    <div class="sub">Данные тянутся напрямую из SEC EDGAR раз в день через GitHub Actions. Полностью бесплатно и автономно.</div>
+  </div>
+
+  <div class="meta-bar" id="metaBar"><span>Загрузка данных…</span></div>
+
+  <div class="warn">
+    <b>⚠ ОГРАНИЧЕНИЕ 13F</b>
+    Нет шортов, хеджей, опционов и неамериканских акций. Задержка подачи до 45 дней. Это карта направления интереса, а не полная стратегия и не сигнал к копированию.
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-view="overlap">⚡ Пересечения с портфелем</div>
+    <div class="tab" data-view="funds">🏦 Движения фондов</div>
+  </div>
+
+  <div class="view active" id="overlap"><div class="loading">Загрузка…</div></div>
+  <div class="view" id="funds"><div class="loading">Загрузка…</div></div>
+
+  <footer>
+    Источник: SEC EDGAR (data.sec.gov) · Обновление: GitHub Actions, ежедневно · Хостинг: GitHub Pages<br>
+    НЕ ИНВЕСТИЦИОННАЯ РЕКОМЕНДАЦИЯ. ДАННЫЕ С ЗАДЕРЖКОЙ И НЕПОЛНЫЕ (БЕЗ ШОРТОВ/ХЕДЖЕЙ).
+  </footer>
+</div>
+
+<script>
+const fmtUSD = v => {
+  if (v >= 1e9) return '$' + (v/1e9).toFixed(1) + 'B';
+  if (v >= 1e6) return '$' + (v/1e6).toFixed(0) + 'M';
+  if (v >= 1e3) return '$' + (v/1e3).toFixed(0) + 'K';
+  return '$' + v;
+};
+
+// Грубое сопоставление тикеров портфеля с названиями эмитентов в 13F.
+// 13F не содержит тикеров, только названия — поэтому матчим по подстроке.
+const PORTFOLIO_NAMES = {
+  'KWEB':'KRANESHARES','NEM':'NEWMONT','HAL':'HALLIBURTON','AMKBY':'MAERSK',
+  'NBIS':'NEBIUS','GNL':'GLOBAL NET LEASE','RIOT':'RIOT','HUT':'HUT 8',
+  'CLSK':'CLEANSPARK','KC':'KINGSOFT','CIG':'ENERGETICA','PSTL':'POSTAL REALTY',
+  'CLM':'CORNERSTONE','KEEL':'KEEL'
+};
+
+function tabs(){
+  document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById(t.dataset.view).classList.add('active');
+  }));
+}
+
+function renderMeta(d){
+  const dates = Object.values(d.funds).filter(f=>f.report_date).map(f=>f.report_date);
+  const newest = dates.sort().reverse()[0] || '—';
+  const gen = new Date(d.generated).toLocaleDateString('ru-RU');
+  document.getElementById('metaBar').innerHTML =
+    `<span>Отчётный период: <b>${newest}</b></span>`+
+    `<span>Обновлено: <b>${gen}</b></span>`+
+    `<span>Фондов: <b>${Object.keys(d.funds).length}</b></span>`;
+}
+
+function renderFunds(d){
+  let html='';
+  for(const [name,f] of Object.entries(d.funds)){
+    if(f.error){ html+=`<div class="fund-block"><div class="fund-name">${name}</div><div class="err">Ошибка: ${f.error}</div></div>`; continue; }
+    const inMoves = [...(f.moves.new||[]).map(m=>({...m,label:'новая'})), ...(f.moves.increased||[]).map(m=>({...m,label:(m.pct>0?'+':'')+m.pct+'%'}))].slice(0,6);
+    const outMoves = [...(f.moves.exited||[]).map(m=>({...m,label:'выход'})), ...(f.moves.decreased||[]).map(m=>({...m,label:m.pct+'%'}))].slice(0,6);
+    html+=`<div class="fund-block">
+      <div class="fund-name">${name}</div>
+      <div class="fund-meta">Отчёт ${f.report_date} · подан ${f.filing_date} · ${f.positions} позиций · ${fmtUSD(f.total_value)}</div>
+      <div class="lbl" style="margin-top:4px">Топ холдинги</div>
+      ${f.top_holdings.map(h=>`<div class="th-row"><span>${h.issuer}</span><span class="p">${h.pct}%</span></div>`).join('')}
+      <div class="moves-grid" style="margin-top:16px">
+        <div class="moves-col in"><h4>↗ Зашёл / нарастил</h4>
+          ${inMoves.length?inMoves.map(m=>`<div class="move-row"><span class="tk">${m.issuer}</span><span class="det">${m.label} · ${fmtUSD(m.value)}</span></div>`).join(''):'<div class="det" style="color:var(--muted)">нет данных</div>'}
+        </div>
+        <div class="moves-col out"><h4>↘ Вышел / сократил</h4>
+          ${outMoves.length?outMoves.map(m=>`<div class="move-row"><span class="tk">${m.issuer}</span><span class="det">${m.label}${m.value?' · '+fmtUSD(m.value):''}</span></div>`).join(''):'<div class="det" style="color:var(--muted)">нет данных</div>'}
+        </div>
+      </div></div>`;
+  }
+  document.getElementById('funds').innerHTML=html;
+}
+
+function renderOverlap(d){
+  // ищем эмитентов из портфеля среди топ-холдингов фондов
+  let matches=[], ideas=[];
+  const allTop={};
+  for(const [name,f] of Object.entries(d.funds)){
+    if(f.error)continue;
+    (f.top_holdings||[]).forEach(h=>{
+      allTop[h.issuer]=allTop[h.issuer]||[];
+      allTop[h.issuer].push({fund:name,pct:h.pct});
+    });
+  }
+  // совпадения: эмитент в топе фонда И в портфеле
+  for(const tk of d.my_portfolio){
+    const needle=PORTFOLIO_NAMES[tk]; if(!needle)continue;
+    for(const [issuer,funds] of Object.entries(allTop)){
+      if(issuer.toUpperCase().includes(needle)){
+        matches.push({tk,issuer,funds});
+      }
+    }
+  }
+  // идеи: эмитент в топе 2+ фондов, но НЕ в портфеле
+  for(const [issuer,funds] of Object.entries(allTop)){
+    if(funds.length>=2){
+      const inPort = d.my_portfolio.some(tk=>PORTFOLIO_NAMES[tk]&&issuer.toUpperCase().includes(PORTFOLIO_NAMES[tk]));
+      if(!inPort) ideas.push({issuer,funds});
+    }
+  }
+  ideas.sort((a,b)=>b.funds.length-a.funds.length);
+
+  let html='<div class="lbl">Совпадения — фонды держат то же, что и ты</div>';
+  if(matches.length){
+    matches.forEach(m=>{
+      html+=`<div class="signal match"><div class="signal-head">
+        <span class="signal-ticker">${m.tk}</span><span class="signal-tag t-match">СОВПАДЕНИЕ</span></div>
+        <div class="signal-body"><b>${m.issuer}</b> держат: ${m.funds.map(f=>f.fund+' ('+f.pct+'%)').join(', ')}. Умные деньги на твоей стороне по этой позиции.</div></div>`;
+    });
+  } else html+='<div class="signal"><div class="signal-body" style="color:var(--muted)">Прямых совпадений в топ-холдингах не найдено. Это нормально: 13F содержит только акции США, а у тебя ETF и иностранные имена.</div></div>';
+
+  html+='<div class="lbl">Идеи — консенсус фондов (у тебя этого нет)</div>';
+  if(ideas.length){
+    ideas.slice(0,8).forEach(i=>{
+      html+=`<div class="signal idea"><div class="signal-head">
+        <span class="signal-ticker">${i.issuer}</span><span class="signal-tag t-idea">${i.funds.length} ФОНДА</span></div>
+        <div class="signal-body">В топ-холдингах: ${i.funds.map(f=>f.fund).join(', ')}. Чем больше разных фондов держат имя, тем сильнее сигнал. ${i.funds.length>=3?'<b>Сильный консенсус.</b>':''}</div></div>`;
+    });
+  } else html+='<div class="signal"><div class="signal-body" style="color:var(--muted)">Пока нет имён в топе 2+ фондов.</div></div>';
+
+  document.getElementById('overlap').innerHTML=html;
+}
+
+async function load(){
+  tabs();
+  try{
+    const res=await fetch('data/funds.json?'+Date.now());
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const d=await res.json();
+    renderMeta(d); renderOverlap(d); renderFunds(d);
+  }catch(e){
+    document.getElementById('overlap').innerHTML=`<div class="err">Не удалось загрузить data/funds.json (${e.message}).<br><br>Это нормально до первого запуска GitHub Action. Запусти workflow вручную: вкладка Actions → Update 13F Data → Run workflow.</div>`;
+    document.getElementById('metaBar').innerHTML='<span style="color:var(--red)">Данные ещё не сгенерированы</span>';
+  }
+}
+load();
+</script>
+</body>
+</html>
