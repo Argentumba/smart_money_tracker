@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-18T14:48:19.540368+00:00",
+  "generated": "2026-06-18T15:43:07.174416+00:00",
   "my_portfolio": [
     "AMKBY",
     "CLSK",
@@ -559,14 +559,266 @@
       "cik": "0001387322",
       "report_date": "2026-03-31",
       "filing_date": "2026-05-15",
-      "total_value": 0,
-      "positions": 0,
-      "top_holdings": [],
+      "total_value": 7742272930,
+      "positions": 35,
+      "top_holdings": [
+        {
+          "issuer": "ALPHABET INC",
+          "value": 768308847,
+          "pct": 9.92
+        },
+        {
+          "issuer": "SANDISK CORP",
+          "value": 508009605,
+          "pct": 6.56
+        },
+        {
+          "issuer": "CELESTICA INC",
+          "value": 427646858,
+          "pct": 5.52
+        },
+        {
+          "issuer": "AMAZON COM INC",
+          "value": 378934561,
+          "pct": 4.89
+        },
+        {
+          "issuer": "TTM TECHNOLOGIES INC",
+          "value": 342388435,
+          "pct": 4.42
+        },
+        {
+          "issuer": "ADVANCED ENERGY INDS",
+          "value": 329845764,
+          "pct": 4.26
+        },
+        {
+          "issuer": "FABRINET",
+          "value": 318787444,
+          "pct": 4.12
+        },
+        {
+          "issuer": "CORNING INC",
+          "value": 312380741,
+          "pct": 4.03
+        },
+        {
+          "issuer": "MKS INC.",
+          "value": 300298242,
+          "pct": 3.88
+        },
+        {
+          "issuer": "META PLATFORMS INC",
+          "value": 293256102,
+          "pct": 3.79
+        }
+      ],
       "moves": {
-        "new": [],
-        "increased": [],
-        "decreased": [],
-        "exited": []
+        "new": [
+          {
+            "issuer": "ADVANCED ENERGY INDS",
+            "value": 329845764,
+            "shares": 1022112
+          },
+          {
+            "issuer": "MKS INC.",
+            "value": 300298242,
+            "shares": 1306724
+          },
+          {
+            "issuer": "LAM RESEARCH CORP",
+            "value": 204660000,
+            "shares": 957877
+          },
+          {
+            "issuer": "TOWER SEMICONDUCTOR LTD",
+            "value": 187191009,
+            "shares": 1066737
+          },
+          {
+            "issuer": "VIAVI SOLUTIONS INC",
+            "value": 115586499,
+            "shares": 3473152
+          },
+          {
+            "issuer": "WESTERN DIGITAL CORP",
+            "value": 111443503,
+            "shares": 412006
+          },
+          {
+            "issuer": "ARM HOLDINGS PLC",
+            "value": 68436652,
+            "shares": 452384
+          },
+          {
+            "issuer": "APPLE INC",
+            "value": 24519413,
+            "shares": 96613
+          },
+          {
+            "issuer": "MICROSOFT CORP",
+            "value": 19933655,
+            "shares": 53850
+          },
+          {
+            "issuer": "ADVANCED MICRO DEVICES INC",
+            "value": 14079594,
+            "shares": 69211
+          },
+          {
+            "issuer": "NETFLIX INC.",
+            "value": 12687954,
+            "shares": 131960
+          }
+        ],
+        "increased": [
+          {
+            "issuer": "ALPHABET INC",
+            "value": 768308847,
+            "pct": 27
+          },
+          {
+            "issuer": "META PLATFORMS INC",
+            "value": 293256102,
+            "pct": 9
+          },
+          {
+            "issuer": "JFROG LTD",
+            "value": 282508885,
+            "pct": 14
+          },
+          {
+            "issuer": "TAIWAN SEMICONDUCTOR MANUFAC",
+            "value": 276931438,
+            "pct": 38
+          },
+          {
+            "issuer": "MACOM TECH SOLUTIONS HLDGS I",
+            "value": 260930251,
+            "pct": 50
+          },
+          {
+            "issuer": "BLOOM ENERGY CORP",
+            "value": 224071736,
+            "pct": 23
+          },
+          {
+            "issuer": "KLAVIYO INC",
+            "value": 132818509,
+            "pct": 123
+          }
+        ],
+        "decreased": [
+          {
+            "issuer": "SANDISK CORP",
+            "value": 508009605,
+            "pct": -20
+          },
+          {
+            "issuer": "CELESTICA INC",
+            "value": 427646858,
+            "pct": -19
+          },
+          {
+            "issuer": "TTM TECHNOLOGIES INC",
+            "value": 342388435,
+            "pct": -18
+          },
+          {
+            "issuer": "CORNING INC",
+            "value": 312380741,
+            "pct": -14
+          },
+          {
+            "issuer": "APPLOVIN CORP",
+            "value": 276823726,
+            "pct": -14
+          },
+          {
+            "issuer": "CARVANA CO",
+            "value": 275885427,
+            "pct": -18
+          },
+          {
+            "issuer": "COHERENT CORP",
+            "value": 232266184,
+            "pct": -11
+          },
+          {
+            "issuer": "BROADCOM INC",
+            "value": 228152820,
+            "pct": -29
+          },
+          {
+            "issuer": "ROBLOX CORP",
+            "value": 199780327,
+            "pct": -14
+          },
+          {
+            "issuer": "SITIME CORP",
+            "value": 199243812,
+            "pct": -17
+          },
+          {
+            "issuer": "NVIDIA CORPORATION",
+            "value": 181572723,
+            "pct": -13
+          },
+          {
+            "issuer": "CIENA CORP",
+            "value": 89784787,
+            "pct": -74
+          },
+          {
+            "issuer": "MONGODB INC",
+            "value": 54987091,
+            "pct": -63
+          },
+          {
+            "issuer": "DUOLINGO INC",
+            "value": 46501777,
+            "pct": -46
+          },
+          {
+            "issuer": "IMPINJ INC",
+            "value": 41618559,
+            "pct": -54
+          }
+        ],
+        "exited": [
+          {
+            "issuer": "SEMTECH CORP",
+            "value": 287499251
+          },
+          {
+            "issuer": "MERCADOLIBRE INC",
+            "value": 197749976
+          },
+          {
+            "issuer": "NU HLDGS LTD",
+            "value": 180054067
+          },
+          {
+            "issuer": "HUBSPOT INC",
+            "value": 59892420
+          },
+          {
+            "issuer": "HEWLETT PACKARD ENTERPRISE C",
+            "value": 45830568
+          },
+          {
+            "issuer": "OKTA INC",
+            "value": 37601825
+          },
+          {
+            "issuer": "WEALTHFRONT CORP",
+            "value": 21744000
+          },
+          {
+            "issuer": "CHIME FINL INC",
+            "value": 266097
+          }
+        ]
       }
     },
     "Octahedron": {
