@@ -75,13 +75,17 @@
 
   <div class="tabs">
     <div class="tab active" data-view="overlap">⚡ Пересечения с портфелем</div>
+    <div class="tab" data-view="themes">🧭 Темы</div>
     <div class="tab" data-view="funds">🏦 Движения фондов</div>
     <div class="tab" data-view="insiders">🕵️ Инсайдеры (Form 4)</div>
+    <div class="tab" data-view="macro">📈 Макро</div>
   </div>
 
   <div class="view active" id="overlap"><div class="loading">Загрузка…</div></div>
+  <div class="view" id="themes"><div class="loading">Загрузка…</div></div>
   <div class="view" id="funds"><div class="loading">Загрузка…</div></div>
   <div class="view" id="insiders"><div class="loading">Загрузка…</div></div>
+  <div class="view" id="macro"><div class="loading">Загрузка…</div></div>
 
   <footer>
     Источник: SEC EDGAR (data.sec.gov) · Обновление: GitHub Actions, ежедневно · Хостинг: GitHub Pages<br>
@@ -109,6 +113,15 @@ const PORTFOLIO_NAMES = {
   // удобрения / агро (сценарий Ормуз/удобрения/продовольствие)
   'CF':'CF INDUSTRIES','NTR':'NUTRIEN','MOS':'MOSAIC','BG':'BUNGE','ADM':'ARCHER DANIELS'
 };
+
+// Тематические корзины — чтобы видеть, куда идут деньги по темам, а не по одному тикеру.
+const THEMES = [
+  {label:'⛏️ Крипта-майнеры', tickers:['CLSK','HUT','RIOT']},
+  {label:'🌾 Удобрения / агро', tickers:['CF','NTR','MOS','BG','ADM']},
+  {label:'🛡️ Защита / сырьё', tickers:['NEM','HAL','AMKBY','CIG']},
+  {label:'🏢 REIT / доход', tickers:['GNL','PSTL','CLM']},
+  {label:'💻 Техно / прочее', tickers:['NBIS','KC','KWEB','KEEL']},
+];
 
 function tabs(){
   document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
@@ -236,22 +249,116 @@ function renderInsiders(d){
   el.innerHTML=html;
 }
 
+// Собирает активность фондов по одному тикеру: кто держит и какие движения.
+function fundActivity(tk, d){
+  const needle=PORTFOLIO_NAMES[tk];
+  const held=[], moves=[];
+  if(!needle) return {held, moves};
+  for(const [name,f] of Object.entries(d.funds||{})){
+    if(f.error) continue;
+    (f.top_holdings||[]).forEach(h=>{
+      if((h.issuer||'').toUpperCase().includes(needle)) held.push({fund:name,pct:h.pct});
+    });
+    const M=f.moves||{};
+    (M.new||[]).forEach(x=>{ if((x.issuer||'').toUpperCase().includes(needle)) moves.push({fund:name,dir:1,label:'новая'}); });
+    (M.increased||[]).forEach(x=>{ if((x.issuer||'').toUpperCase().includes(needle)) moves.push({fund:name,dir:1,label:(x.pct>0?'+':'')+x.pct+'%'}); });
+    (M.decreased||[]).forEach(x=>{ if((x.issuer||'').toUpperCase().includes(needle)) moves.push({fund:name,dir:-1,label:x.pct+'%'}); });
+    (M.exited||[]).forEach(x=>{ if((x.issuer||'').toUpperCase().includes(needle)) moves.push({fund:name,dir:-1,label:'выход'}); });
+  }
+  return {held, moves};
+}
+
+function renderThemes(d){
+  const el=document.getElementById('themes');
+  let html='<div class="lbl">Куда идут деньги по темам · топ-холдинги + движения фондов</div>';
+  THEMES.forEach(theme=>{
+    let ins=0, outs=0, rows='';
+    theme.tickers.forEach(tk=>{
+      const {held,moves}=fundActivity(tk,d);
+      moves.forEach(m=>{ m.dir>0?ins++:outs++; });
+      const heldTxt = held.length
+        ? held.map(h=>`${esc(h.fund)} (${h.pct}%)`).join(', ')
+        : '<span style="color:var(--muted)">в топ-холдингах фондов нет</span>';
+      const movesTxt = moves.length
+        ? ' · '+moves.map(m=>`<span style="color:var(--${m.dir>0?'green':'red'})">${esc(m.fund)} ${esc(m.label)}</span>`).join(', ')
+        : '';
+      rows+=`<div class="th-row" style="flex-wrap:wrap;gap:6px">
+        <span class="tk" style="min-width:56px"><b>$${esc(tk)}</b></span>
+        <span style="flex:1;font-size:12px;color:var(--dim)">${heldTxt}${movesTxt}</span></div>`;
+    });
+    const net = ins-outs;
+    const dot = net>0?'🟢':(net<0?'🔴':'⚪');
+    const senti = ins||outs ? `${dot} нетто ${net>0?'+':''}${net} (нарастили ${ins} / сократили ${outs})`
+                            : '⚪ движений по теме нет';
+    html+=`<div class="fund-block">
+      <div class="signal-head" style="margin-bottom:10px">
+        <span class="fund-name">${theme.label}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim)">${senti}</span></div>
+      ${rows}</div>`;
+  });
+  el.innerHTML=html;
+}
+
+function renderMacro(m){
+  const el=document.getElementById('macro');
+  const inds=(m&&m.indicators)||[];
+  let html='';
+  if(m&&m.note){
+    html+=`<div class="warn" style="margin:0 0 16px"><b>⚠ ДЕМО</b>${esc(m.note)}</div>`;
+  }
+  if(inds.length){
+    html+='<div class="lbl">Макро-индикаторы · ранние сигналы смены нарратива</div>';
+    inds.forEach(i=>{
+      const c1=i.change_1d, c5=i.change_5d;
+      const col=v=>v==null?'var(--muted)':(v>0?'var(--green)':(v<0?'var(--red)':'var(--dim)'));
+      const pct=v=>v==null?'—':(v>0?'+':'')+v.toFixed(1)+'%';
+      const price=i.price!=null?Number(i.price).toLocaleString('ru-RU',{maximumFractionDigits:2}):'—';
+      const flag=i.alert?' <span class="signal-tag t-conflict">СКАЧОК</span>':'';
+      html+=`<div class="signal"><div class="signal-head">
+        <span class="signal-ticker">${esc(i.label)}</span>${flag}
+        <span style="font-family:'JetBrains Mono',monospace;font-size:13px">${price} ${esc(i.unit||'')}</span></div>
+        <div class="signal-body" style="font-family:'JetBrains Mono',monospace;font-size:12px">
+          День: <b style="color:${col(c1)}">${pct(c1)}</b> · Неделя: <b style="color:${col(c5)}">${pct(c5)}</b>
+          <span style="color:var(--muted)"> · ${esc(i.date||'')}</span></div></div>`;
+    });
+  } else {
+    html+='<div class="lbl">Макро-индикаторы</div>'+
+      '<div class="signal"><div class="signal-body" style="color:var(--muted)">'+
+      'Данные появятся после первого запуска сбора макро (Stooq). Если пусто и после прогона — '+
+      'источник мог быть недоступен; это не влияет на остальные вкладки.</div></div>';
+  }
+  const mw=(m&&m.manual_watch)||[];
+  if(mw.length){
+    html+='<div class="lbl">Смотреть вручную · нет бесплатного API</div>';
+    mw.forEach(w=>{
+      html+=`<div class="signal idea"><div class="signal-head">
+        <span class="signal-ticker">${esc(w.label)}</span></div>
+        <div class="signal-body">${esc(w.why||'')} ${w.url?`· <a href="${esc(w.url)}" target="_blank" rel="noopener" style="color:var(--blue)">открыть ↗</a>`:''}</div></div>`;
+    });
+  }
+  el.innerHTML=html;
+}
+
 async function load(){
   tabs();
   try{
     const res=await fetch('data/funds.json?'+Date.now());
     if(!res.ok)throw new Error('HTTP '+res.status);
     const d=await res.json();
-    renderMeta(d); renderOverlap(d); renderFunds(d);
+    renderMeta(d); renderOverlap(d); renderFunds(d); renderThemes(d);
   }catch(e){
     document.getElementById('overlap').innerHTML=`<div class="err">Не удалось загрузить data/funds.json (${e.message}).<br><br>Это нормально до первого запуска GitHub Action. Запусти workflow вручную: вкладка Actions → Update Smart Money Data → Run workflow.</div>`;
     document.getElementById('metaBar').innerHTML='<span style="color:var(--red)">Данные ещё не сгенерированы</span>';
   }
-  // Инсайдеры — независимо и толерантно (файла может ещё не быть).
+  // Инсайдеры и макро — независимо и толерантно (файлов может ещё не быть).
   try{
     const r=await fetch('data/insiders.json?'+Date.now());
     renderInsiders(r.ok ? await r.json() : null);
   }catch(e){ renderInsiders(null); }
+  try{
+    const r=await fetch('data/macro.json?'+Date.now());
+    renderMacro(r.ok ? await r.json() : null);
+  }catch(e){ renderMacro(null); }
 }
 load();
 </script>
