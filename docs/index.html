@@ -303,6 +303,9 @@ function renderMacro(m){
   const el=document.getElementById('macro');
   const inds=(m&&m.indicators)||[];
   let html='';
+  if(m&&m.note){
+    html+=`<div class="warn" style="margin:0 0 16px"><b>⚠ ДЕМО</b>${esc(m.note)}</div>`;
+  }
   if(inds.length){
     html+='<div class="lbl">Макро-индикаторы · ранние сигналы смены нарратива</div>';
     inds.forEach(i=>{

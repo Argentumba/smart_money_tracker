@@ -23,15 +23,19 @@ from pathlib import Path
 from fetch_13f import get, OUT
 import notify
 
-# key, человекочитаемый label, символ Stooq, единица, порог алерта (|Δ день| %).
+# Отслеживаем ликвидные commodity-ETF (тикеры Stooq с суффиксом .us стабильны и
+# проверяемы), а не фьючерсные continuation-символы — те на Stooq капризны.
+# Показываем реальную цену пая ETF; сигнал несёт % изменения, а он повторяет
+# базовый актив. key, label (с тикером), символ Stooq, единица, порог алерта (|Δ день| %).
 INDICATORS = [
-    {"key": "brent",  "label": "Brent",                     "symbol": "cb.f", "unit": "$/бар", "alert": 5.0},
-    {"key": "wti",    "label": "WTI",                       "symbol": "cl.f", "unit": "$/бар", "alert": 5.0},
-    {"key": "natgas", "label": "Природный газ (Henry Hub)", "symbol": "ng.f", "unit": "$/MMBtu", "alert": 8.0},
-    {"key": "gold",   "label": "Золото",                    "symbol": "gc.f", "unit": "$/унц", "alert": 3.0},
-    {"key": "wheat",  "label": "Пшеница",                   "symbol": "zw.f", "unit": "¢/буш", "alert": 5.0},
-    {"key": "corn",   "label": "Кукуруза",                  "symbol": "zc.f", "unit": "¢/буш", "alert": 5.0},
-    {"key": "dxy",    "label": "Индекс доллара (DXY)",      "symbol": "dx.f", "unit": "",      "alert": 1.5},
+    {"key": "brent",  "label": "Нефть Brent (BNO)",   "symbol": "bno.us",  "unit": "$", "alert": 5.0},
+    {"key": "wti",    "label": "Нефть WTI (USO)",     "symbol": "uso.us",  "unit": "$", "alert": 5.0},
+    {"key": "natgas", "label": "Природный газ (UNG)", "symbol": "ung.us",  "unit": "$", "alert": 8.0},
+    {"key": "gold",   "label": "Золото (GLD)",        "symbol": "gld.us",  "unit": "$", "alert": 3.0},
+    {"key": "wheat",  "label": "Пшеница (WEAT)",      "symbol": "weat.us", "unit": "$", "alert": 5.0},
+    {"key": "corn",   "label": "Кукуруза (CORN)",     "symbol": "corn.us", "unit": "$", "alert": 5.0},
+    {"key": "agri",   "label": "Агробизнес (MOO)",    "symbol": "moo.us",  "unit": "$", "alert": 4.0},
+    {"key": "dxy",    "label": "Доллар (UUP)",        "symbol": "uup.us",  "unit": "$", "alert": 1.5},
 ]
 
 # Что важно, но бесплатного API нет — выводим ссылками на дашборде.
@@ -108,6 +112,7 @@ def implication(ind):
         "gold":   "золото — защитный бид, плюс для NEM" if up else "золото вниз — risk-on",
         "wheat":  "зерно — продовольственный тезис (BG/ADM)",
         "corn":   "зерно — продовольственный тезис (BG/ADM)",
+        "agri":   "агробизнес — прямой прокси удобренческого тезиса (CF/NTR/MOS/ADM)",
         "dxy":    "доллар вверх — давит на сырьё и EM" if up else "доллар вниз — попутный ветер сырью",
     }
     return hints.get(k, "")
