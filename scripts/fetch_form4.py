@@ -190,11 +190,16 @@ def parse_form4(root):
         price = _txt(t, "transactionAmounts/transactionPricePerShare/value") or "0"
         ad = _txt(t, "transactionAmounts/transactionAcquiredDisposedCode/value") or ""
         date = _txt(t, "transactionDate/value") or ""
+        owned = _txt(t, "postTransactionAmounts/sharesOwnedFollowingTransaction/value")
         try:
             shares_n = float(shares)
             price_n = float(price)
         except ValueError:
             continue
+        try:
+            owned_n = float(owned) if owned is not None else None
+        except ValueError:
+            owned_n = None
         txns.append({
             "code": code,
             "shares": shares_n,
@@ -202,24 +207,43 @@ def parse_form4(root):
             "value": shares_n * price_n,
             "acq_disp": ad,  # A=приобрёл, D=избавился
             "date": date,
+            "owned_after": owned_n,
         })
     return {"insider": name, "title": title, "txns": txns}
 
 
 def aggregate(txns):
-    """Схлопываем транзакции одной подачи по коду: сумма акций, взвешенная цена."""
+    """Схлопываем транзакции одной подачи по коду: сумма акций, взвешенная цена.
+
+    Дополнительно считаем долю пакета: сколько процентов своего холдинга инсайдер
+    затронул этой сделкой (сильный маркер убеждённости — продать 5% пакета и
+    продать 90% это очень разные сигналы). owned_after берём из последней по
+    порядку транзакции кода (это итоговый остаток), а прежний размер пакета
+    реконструируем от него.
+    """
     by_code = {}
     for t in txns:
         if t["code"] not in ALERT_CODES:
             continue
-        agg = by_code.setdefault(t["code"], {"shares": 0.0, "value": 0.0, "date": t["date"]})
+        agg = by_code.setdefault(t["code"], {"shares": 0.0, "value": 0.0,
+                                             "date": t["date"], "owned_after": None})
         agg["shares"] += t["shares"]
         agg["value"] += t["value"]
+        if t.get("owned_after") is not None:
+            agg["owned_after"] = t["owned_after"]  # последний по порядку = итоговый
     out = []
     for code, a in by_code.items():
         price = a["value"] / a["shares"] if a["shares"] else 0.0
+        stake_pct = None
+        owned = a["owned_after"]
+        if owned is not None:
+            # P (покупка) → прежний = итог − купленное; S (продажа) → прежний = итог + проданное
+            prior = owned - a["shares"] if code == "P" else owned + a["shares"]
+            if prior > 0:
+                stake_pct = round(a["shares"] / prior * 100)
         out.append({"code": code, "shares": a["shares"], "value": a["value"],
-                    "price": price, "date": a["date"]})
+                    "price": price, "date": a["date"],
+                    "owned_after": owned, "stake_pct": stake_pct})
     return out
 
 
@@ -234,20 +258,38 @@ def fmt_usd(v):
     return f"${v:.0f}"
 
 
-def build_message(ticker, parsed, agg):
+def _shares(n):
+    return f"{n:,.0f}".replace(",", " ")
+
+
+def build_message(ticker, parsed, agg, url=None):
     lines = []
     for a in agg:
         buy = a["code"] == "P"
         head = "🟢 <b>ИНСАЙДЕР ПОКУПАЕТ</b>" if buy else "🔴 <b>ИНСАЙДЕР ПРОДАЁТ</b>"
         verb = "Купил" if buy else "Продал"
-        shares = f"{a['shares']:,.0f}".replace(",", " ")
         price = f"${a['price']:,.2f}" if a["price"] else "—"
-        lines.append(
-            f"{head} · ${notify.esc(ticker)}\n"
-            f"<b>{notify.esc(parsed['insider'])}</b> — {notify.esc(parsed['title'])}\n"
-            f"{verb} {shares} шт @ {price} ≈ <b>{fmt_usd(a['value'])}</b>\n"
-            f"Сделка {notify.esc(a['date'])} · Form 4"
-        )
+
+        # доля пакета — маркер убеждённости
+        stake = ""
+        if a.get("stake_pct") is not None:
+            if buy:
+                stake = f" (+{a['stake_pct']}% к пакету)"
+            else:
+                stake = " (продал весь пакет)" if a["stake_pct"] >= 99 else f" (−{a['stake_pct']}% пакета)"
+
+        row = [
+            f"{head} · ${notify.esc(ticker)}",
+            f"<b>{notify.esc(parsed['insider'])}</b> — {notify.esc(parsed['title'])}",
+            f"{verb} {_shares(a['shares'])} шт @ {price} ≈ <b>{fmt_usd(a['value'])}</b>{stake}",
+        ]
+        if a.get("owned_after") is not None:
+            row.append(f"Осталось у инсайдера: {_shares(a['owned_after'])} шт")
+        tail = f"Сделка {notify.esc(a['date'])} · Form 4"
+        if url:
+            tail += f" · <a href=\"{notify.esc(url)}\">SEC</a>"
+        row.append(tail)
+        lines.append("\n".join(row))
     return "\n\n".join(lines)
 
 
@@ -292,6 +334,8 @@ def main():
             agg = aggregate(parsed["txns"])
             if not agg:
                 continue  # были только грант/опцион/налог — не сигнал убеждённости
+            url = (f"https://www.sec.gov/Archives/edgar/data/{int(cik10)}/"
+                   f"{f['acc_nodash']}/{f['accession']}-index.htm")
             record = {
                 "ticker": ticker,
                 "cik": cik10,
@@ -299,18 +343,19 @@ def main():
                 "title": parsed["title"],
                 "filing_date": f["filing_date"],
                 "accession": f["accession"],
+                "url": url,
                 "trades": agg,
             }
             fresh_txns.append(record)
             if not seeding:
-                alerts.append((ticker, parsed, agg))
+                alerts.append((ticker, parsed, agg, url))
 
     # Отправляем алерты (в хронологическом порядке подачи)
     alerts_sent = 0
     if alerts:
         alerts.sort(key=lambda a: a[1]["txns"][0]["date"] if a[1]["txns"] else "")
-        for ticker, parsed, agg in alerts:
-            if notify.send(build_message(ticker, parsed, agg)):
+        for ticker, parsed, agg, url in alerts:
+            if notify.send(build_message(ticker, parsed, agg, url)):
                 alerts_sent += 1
 
     # Обновляем состояние

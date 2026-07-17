@@ -76,10 +76,12 @@
   <div class="tabs">
     <div class="tab active" data-view="overlap">⚡ Пересечения с портфелем</div>
     <div class="tab" data-view="funds">🏦 Движения фондов</div>
+    <div class="tab" data-view="insiders">🕵️ Инсайдеры (Form 4)</div>
   </div>
 
   <div class="view active" id="overlap"><div class="loading">Загрузка…</div></div>
   <div class="view" id="funds"><div class="loading">Загрузка…</div></div>
+  <div class="view" id="insiders"><div class="loading">Загрузка…</div></div>
 
   <footer>
     Источник: SEC EDGAR (data.sec.gov) · Обновление: GitHub Actions, ежедневно · Хостинг: GitHub Pages<br>
@@ -94,6 +96,8 @@ const fmtUSD = v => {
   if (v >= 1e3) return '$' + (v/1e3).toFixed(0) + 'K';
   return '$' + v;
 };
+const esc = s => String(s==null?'':s).replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const fmtSh = n => Math.round(n).toLocaleString('ru-RU');
 
 // Грубое сопоставление тикеров портфеля с названиями эмитентов в 13F.
 // 13F не содержит тикеров, только названия — поэтому матчим по подстроке.
@@ -196,6 +200,40 @@ function renderOverlap(d){
   document.getElementById('overlap').innerHTML=html;
 }
 
+function renderInsiders(d){
+  const el=document.getElementById('insiders');
+  const txns=(d&&d.transactions)||[];
+  if(!txns.length){
+    el.innerHTML='<div class="lbl">Сделки инсайдеров · Form 4</div>'+
+      '<div class="signal"><div class="signal-body" style="color:var(--muted)">'+
+      'Пока нет зафиксированных сделок. Данные копятся с первого запуска мониторинга Form 4 — '+
+      'по мере новых подач в SEC (задержка ~2 рабочих дня). Отслеживаются только открытые '+
+      'покупки (P) и продажи (S) по тикерам портфеля; ETF и иностранные ADR формы 4 не подают.'+
+      '</div></div>';
+    return;
+  }
+  let html='<div class="lbl">Сделки инсайдеров · Form 4 · задержка ~2 дня</div>';
+  txns.forEach(r=>{
+    (r.trades||[]).forEach(t=>{
+      const buy=t.code==='P';
+      const cls=buy?'match':'conflict', tag=buy?'t-match':'t-conflict';
+      const label=buy?'ПОКУПКА':'ПРОДАЖА', verb=buy?'Купил':'Продал';
+      const price=t.price?('$'+Number(t.price).toFixed(2)):'—';
+      let stake='';
+      if(t.stake_pct!=null) stake=buy?` · +${t.stake_pct}% к пакету`:(t.stake_pct>=99?' · весь пакет':` · −${t.stake_pct}% пакета`);
+      const owned=(t.owned_after!=null)?` · осталось ${fmtSh(t.owned_after)} шт`:'';
+      const link=r.url?` · <a href="${esc(r.url)}" target="_blank" rel="noopener" style="color:var(--muted)">SEC ↗</a>`:'';
+      html+=`<div class="signal ${cls}"><div class="signal-head">
+        <span class="signal-ticker">$${esc(r.ticker)}</span>
+        <span class="signal-tag ${tag}">${label}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)">${esc(t.date||r.filing_date)}</span></div>
+        <div class="signal-body"><b>${esc(r.insider)}</b> — ${esc(r.title)}<br>
+        ${verb} <b>${fmtSh(t.shares)}</b> шт @ ${price} ≈ <b>${fmtUSD(t.value)}</b>${stake}${owned}${link}</div></div>`;
+    });
+  });
+  el.innerHTML=html;
+}
+
 async function load(){
   tabs();
   try{
@@ -204,9 +242,14 @@ async function load(){
     const d=await res.json();
     renderMeta(d); renderOverlap(d); renderFunds(d);
   }catch(e){
-    document.getElementById('overlap').innerHTML=`<div class="err">Не удалось загрузить data/funds.json (${e.message}).<br><br>Это нормально до первого запуска GitHub Action. Запусти workflow вручную: вкладка Actions → Update 13F Data → Run workflow.</div>`;
+    document.getElementById('overlap').innerHTML=`<div class="err">Не удалось загрузить data/funds.json (${e.message}).<br><br>Это нормально до первого запуска GitHub Action. Запусти workflow вручную: вкладка Actions → Update Smart Money Data → Run workflow.</div>`;
     document.getElementById('metaBar').innerHTML='<span style="color:var(--red)">Данные ещё не сгенерированы</span>';
   }
+  // Инсайдеры — независимо и толерантно (файла может ещё не быть).
+  try{
+    const r=await fetch('data/insiders.json?'+Date.now());
+    renderInsiders(r.ok ? await r.json() : null);
+  }catch(e){ renderInsiders(null); }
 }
 load();
 </script>

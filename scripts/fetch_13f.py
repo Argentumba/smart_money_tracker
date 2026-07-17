@@ -36,6 +36,15 @@ FUNDS = {
 MY_PORTFOLIO = ["AMKBY","CLSK","CIG","GNL","HAL","HUT","KEEL","KC",
                 "NBIS","NEM","PSTL","RIOT","CLM","KWEB"]
 
+# Тикер → подстрока названия эмитента в 13F (13F не содержит тикеров).
+# Зеркало PORTFOLIO_NAMES из docs/index.html — держи в синхроне.
+PORTFOLIO_NAMES = {
+    "KWEB": "KRANESHARES", "NEM": "NEWMONT", "HAL": "HALLIBURTON", "AMKBY": "MAERSK",
+    "NBIS": "NEBIUS", "GNL": "GLOBAL NET LEASE", "RIOT": "RIOT", "HUT": "HUT 8",
+    "CLSK": "CLEANSPARK", "KC": "KINGSOFT", "CIG": "ENERGETICA", "PSTL": "POSTAL REALTY",
+    "CLM": "CORNERSTONE", "KEEL": "KEEL",
+}
+
 HEADERS = {
     "User-Agent": f"smart-money-dashboard/1.0 ({SEC_CONTACT})",
 }
@@ -201,12 +210,43 @@ def fmt_usd(v):
     return f"${v:.0f}"
 
 
+def portfolio_hits(fund):
+    """Ищет движения фонда, затрагивающие тикеры твоего портфеля.
+
+    Возвращает список строк вида '$TICKER — NEWMONT: +43%'. Это самое ценное
+    в дайджесте: не абстрактные движения фонда, а те, что пересекаются с тобой.
+    """
+    m = fund["moves"]
+    labelled = (
+        [("новая", x) for x in m.get("new", [])] +
+        [((("+" if x.get("pct", 0) > 0 else "") + f"{x.get('pct', 0)}%"), x) for x in m.get("increased", [])] +
+        [("полный выход", x) for x in m.get("exited", [])] +
+        [(f"{x.get('pct', 0)}%", x) for x in m.get("decreased", [])]
+    )
+    hits = []
+    for tk, needle in PORTFOLIO_NAMES.items():
+        for label, x in labelled:
+            if needle in (x.get("issuer", "") or "").upper():
+                hits.append(f"${tk} — {x['issuer']}: {label}")
+    return hits
+
+
 def build_13f_digest(name, fund):
     """Короткий дайджест движений фонда за новый отчётный квартал."""
     e = notify.esc
+    edgar = (f"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany"
+             f"&CIK={fund.get('cik','')}&type=13F-HR&dateb=&owner=include&count=10")
     lines = [f"🏦 <b>{e(name)}</b> подал новый 13F",
              f"Квартал {e(fund['report_date'])} · подан {e(fund['filing_date'])} · "
              f"{fund['positions']} позиций · {fmt_usd(fund['total_value'])}"]
+
+    # пересечение с портфелем — вверх, крупным планом
+    hits = portfolio_hits(fund)
+    if hits:
+        lines.append("\n⚡ <b>Затрагивает твой портфель</b>")
+        for h in hits[:8]:
+            lines.append(f"  • {e(h)}")
+
     m = fund["moves"]
     new, inc = m.get("new", []), m.get("increased", [])
     exited, dec = m.get("exited", []), m.get("decreased", [])
@@ -223,7 +263,9 @@ def build_13f_digest(name, fund):
             lines.append(f"  • {e(x['issuer'])} — полный выход, было {fmt_usd(x['value'])}")
         for x in dec[:5]:
             lines.append(f"  • {e(x['issuer'])} — {x['pct']}%, {fmt_usd(x['value'])}")
-    lines.append("\n<i>13F: только длинные позиции США, задержка до 45 дней. "
+
+    lines.append(f"\n<a href=\"{e(edgar)}\">Подача на SEC EDGAR</a>")
+    lines.append("<i>13F: только длинные позиции США, задержка до 45 дней. "
                  "Карта прошлого, не сигнал в реальном времени.</i>")
     return "\n".join(lines)
 
