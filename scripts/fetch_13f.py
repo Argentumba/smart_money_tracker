@@ -33,8 +33,11 @@ FUNDS = {
 }
 
 # Твои тикеры — для вкладки "пересечения". Меняй под себя.
+# Второй блок — тематическая корзина под сценарий «Ормуз/удобрения/продовольствие»:
+# азотка вне Залива (CF/NTR/MOS) и зерновые трейдеры (BG/ADM).
 MY_PORTFOLIO = ["AMKBY","CLSK","CIG","GNL","HAL","HUT","KEEL","KC",
-                "NBIS","NEM","PSTL","RIOT","CLM","KWEB"]
+                "NBIS","NEM","PSTL","RIOT","CLM","KWEB",
+                "CF","NTR","MOS","BG","ADM"]
 
 # Тикер → подстрока названия эмитента в 13F (13F не содержит тикеров).
 # Зеркало PORTFOLIO_NAMES из docs/index.html — держи в синхроне.
@@ -43,6 +46,9 @@ PORTFOLIO_NAMES = {
     "NBIS": "NEBIUS", "GNL": "GLOBAL NET LEASE", "RIOT": "RIOT", "HUT": "HUT 8",
     "CLSK": "CLEANSPARK", "KC": "KINGSOFT", "CIG": "ENERGETICA", "PSTL": "POSTAL REALTY",
     "CLM": "CORNERSTONE", "KEEL": "KEEL",
+    # удобрения / агро
+    "CF": "CF INDUSTRIES", "NTR": "NUTRIEN", "MOS": "MOSAIC",
+    "BG": "BUNGE", "ADM": "ARCHER DANIELS",
 }
 
 HEADERS = {
