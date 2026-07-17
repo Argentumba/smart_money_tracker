@@ -17,6 +17,8 @@ from pathlib import Path
 from collections import defaultdict
 import xml.etree.ElementTree as ET
 
+import notify
+
 # ─────────────────────────────────────────────────────────────
 # КОНФИГ: впиши свой email (требование SEC), и список фондов по CIK.
 # CIK находишь на sec.gov → поиск компании. Ведущие нули можно опускать.
@@ -33,6 +35,15 @@ FUNDS = {
 # Твои тикеры — для вкладки "пересечения". Меняй под себя.
 MY_PORTFOLIO = ["AMKBY","CLSK","CIG","GNL","HAL","HUT","KEEL","KC",
                 "NBIS","NEM","PSTL","RIOT","CLM","KWEB"]
+
+# Тикер → подстрока названия эмитента в 13F (13F не содержит тикеров).
+# Зеркало PORTFOLIO_NAMES из docs/index.html — держи в синхроне.
+PORTFOLIO_NAMES = {
+    "KWEB": "KRANESHARES", "NEM": "NEWMONT", "HAL": "HALLIBURTON", "AMKBY": "MAERSK",
+    "NBIS": "NEBIUS", "GNL": "GLOBAL NET LEASE", "RIOT": "RIOT", "HUT": "HUT 8",
+    "CLSK": "CLEANSPARK", "KC": "KINGSOFT", "CIG": "ENERGETICA", "PSTL": "POSTAL REALTY",
+    "CLM": "CORNERSTONE", "KEEL": "KEEL",
+}
 
 HEADERS = {
     "User-Agent": f"smart-money-dashboard/1.0 ({SEC_CONTACT})",
@@ -171,7 +182,96 @@ def top_holdings(holdings, n=10):
              "pct": round(r["value"] / total * 100, 2)} for r in rows]
 
 
+def load_prev_report_dates():
+    """report_date каждого фонда из уже лежащего funds.json (до перезаписи).
+
+    Нужно, чтобы Telegram-дайджест 13F слался ТОЛЬКО когда фонд подал свежий
+    квартал (report_date сдвинулся), а не на каждый ежедневный cron —
+    funds.json меняется каждый день из-за поля generated, но холдинги те же.
+    """
+    path = OUT / "funds.json"
+    if not path.exists():
+        return None  # первый запуск — не спамим историей
+    try:
+        old = json.loads(path.read_text(encoding="utf-8"))
+        return {name: f.get("report_date") for name, f in old.get("funds", {}).items()}
+    except Exception:
+        return {}
+
+
+def fmt_usd(v):
+    v = abs(v)
+    if v >= 1e9:
+        return f"${v/1e9:.1f}B"
+    if v >= 1e6:
+        return f"${v/1e6:.0f}M"
+    if v >= 1e3:
+        return f"${v/1e3:.0f}K"
+    return f"${v:.0f}"
+
+
+def portfolio_hits(fund):
+    """Ищет движения фонда, затрагивающие тикеры твоего портфеля.
+
+    Возвращает список строк вида '$TICKER — NEWMONT: +43%'. Это самое ценное
+    в дайджесте: не абстрактные движения фонда, а те, что пересекаются с тобой.
+    """
+    m = fund["moves"]
+    labelled = (
+        [("новая", x) for x in m.get("new", [])] +
+        [((("+" if x.get("pct", 0) > 0 else "") + f"{x.get('pct', 0)}%"), x) for x in m.get("increased", [])] +
+        [("полный выход", x) for x in m.get("exited", [])] +
+        [(f"{x.get('pct', 0)}%", x) for x in m.get("decreased", [])]
+    )
+    hits = []
+    for tk, needle in PORTFOLIO_NAMES.items():
+        for label, x in labelled:
+            if needle in (x.get("issuer", "") or "").upper():
+                hits.append(f"${tk} — {x['issuer']}: {label}")
+    return hits
+
+
+def build_13f_digest(name, fund):
+    """Короткий дайджест движений фонда за новый отчётный квартал."""
+    e = notify.esc
+    edgar = (f"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany"
+             f"&CIK={fund.get('cik','')}&type=13F-HR&dateb=&owner=include&count=10")
+    lines = [f"🏦 <b>{e(name)}</b> подал новый 13F",
+             f"Квартал {e(fund['report_date'])} · подан {e(fund['filing_date'])} · "
+             f"{fund['positions']} позиций · {fmt_usd(fund['total_value'])}"]
+
+    # пересечение с портфелем — вверх, крупным планом
+    hits = portfolio_hits(fund)
+    if hits:
+        lines.append("\n⚡ <b>Затрагивает твой портфель</b>")
+        for h in hits[:8]:
+            lines.append(f"  • {e(h)}")
+
+    m = fund["moves"]
+    new, inc = m.get("new", []), m.get("increased", [])
+    exited, dec = m.get("exited", []), m.get("decreased", [])
+    if new or inc:
+        lines.append("\n↗️ <b>Зашёл / нарастил</b>")
+        for x in new[:5]:
+            lines.append(f"  • {e(x['issuer'])} — новая, {fmt_usd(x['value'])}")
+        for x in inc[:5]:
+            sign = "+" if x.get("pct", 0) > 0 else ""
+            lines.append(f"  • {e(x['issuer'])} — {sign}{x['pct']}%, {fmt_usd(x['value'])}")
+    if exited or dec:
+        lines.append("\n↘️ <b>Вышел / сократил</b>")
+        for x in exited[:5]:
+            lines.append(f"  • {e(x['issuer'])} — полный выход, было {fmt_usd(x['value'])}")
+        for x in dec[:5]:
+            lines.append(f"  • {e(x['issuer'])} — {x['pct']}%, {fmt_usd(x['value'])}")
+
+    lines.append(f"\n<a href=\"{e(edgar)}\">Подача на SEC EDGAR</a>")
+    lines.append("<i>13F: только длинные позиции США, задержка до 45 дней. "
+                 "Карта прошлого, не сигнал в реальном времени.</i>")
+    return "\n".join(lines)
+
+
 def main():
+    prev_dates = load_prev_report_dates()
     result = {"generated": datetime.now(timezone.utc).isoformat(),
               "my_portfolio": MY_PORTFOLIO, "funds": {}}
     for name, cik in FUNDS.items():
@@ -205,6 +305,24 @@ def main():
             result["funds"][name] = {"error": str(e)}
     (OUT / "funds.json").write_text(json.dumps(result, ensure_ascii=False, indent=2))
     print(f"\n✓ Сохранено в {OUT/'funds.json'}")
+
+    # Telegram-дайджест только для фондов, подавших свежий квартал.
+    if prev_dates is None:
+        print("→ Первый запуск 13F: дайджесты не шлём (посев).")
+    else:
+        sent = 0
+        for name, fund in result["funds"].items():
+            if fund.get("error"):
+                continue
+            rd = fund.get("report_date")
+            old_rd = prev_dates.get(name)
+            # шлём, если фонд новый в конфиге ИЛИ отчётный период сдвинулся
+            if rd and rd != old_rd:
+                if notify.send(build_13f_digest(name, fund)):
+                    sent += 1
+                    print(f"  [tg] дайджест 13F отправлен: {name} ({old_rd} → {rd})")
+        if sent == 0:
+            print("→ Свежих 13F-подач нет — Telegram молчит (это норма между кварталами).")
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-name: Update 13F Data
+name: Update Smart Money Data
 
 on:
   schedule:
@@ -11,6 +11,12 @@ permissions:
 jobs:
   fetch:
     runs-on: ubuntu-latest
+    env:
+      # Секреты для Telegram-алертов. Задай их в
+      # Settings → Secrets and variables → Actions → New repository secret.
+      # Если не заданы — скрипты просто не шлют уведомления (workflow не падает).
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,14 +29,17 @@ jobs:
       - name: Fetch 13F data from SEC EDGAR
         run: python3 scripts/fetch_13f.py
 
+      - name: Fetch insider Form 4 trades from SEC EDGAR
+        run: python3 scripts/fetch_form4.py
+
       - name: Commit updated data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/data/funds.json
+          git add docs/data/funds.json docs/data/insiders.json
           if git diff --staged --quiet; then
-            echo "No changes — 13F data unchanged."
+            echo "No changes — data unchanged."
           else
-            git commit -m "chore: update 13F data $(date -u +%Y-%m-%d)"
+            git commit -m "chore: update smart money data $(date -u +%Y-%m-%d)"
             git push
           fi
