@@ -1,0 +1,21 @@
+{
+  "generated": "2026-07-19T11:51:17.137850+00:00",
+  "indicators": [],
+  "manual_watch": [
+    {
+      "label": "Карбамид (Middle East urea FOB)",
+      "why": "Прямой тепловизор удобренческого шока — цена азотки из Залива.",
+      "url": "https://www.google.com/search?q=middle+east+urea+price+fob"
+    },
+    {
+      "label": "Ставки танкеров (Baltic Dirty Tanker Index)",
+      "why": "Дёргаются первыми при рисках вокруг Ормуза, до заголовков.",
+      "url": "https://www.balticexchange.com/en/data-services/routes.html"
+    },
+    {
+      "label": "Индекс продовольствия ФАО (FAO Food Price Index)",
+      "why": "Итоговый барометр продбезопасности (запаздывает; фьючерсы зерна опережают).",
+      "url": "https://www.fao.org/worldfoodsituation/foodpricesindex/en/"
+    }
+  ]
+}
