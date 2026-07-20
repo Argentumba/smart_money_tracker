@@ -24,10 +24,14 @@ smart-money-monitor v2 — циклы и «сжатие пружины» по п
 """
 
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from fetch_13f import get, OUT
+import fetch_form4 as F4
 import notify
+
+# Окно, в котором инсайдерская покупка считается совпадающей с разжатием пружины.
+INSIDER_WINDOW_DAYS = 45
 
 # Производители удобрений (US-листинг, тикеры Stooq .us):
 # азот — CF, UAN; калий — MOS, NTR, IPI, ICL; спец/литий-калий — SQM.
@@ -190,6 +194,39 @@ def analyze(data):
     }
 
 
+def recent_insider_buys(cik10):
+    """Свежие ОТКРЫТЫЕ ПОКУПКИ инсайдеров (Form 4, код P) за окно совпадения.
+
+    Переиспользует парсер из fetch_form4. Возвращает список покупок (может быть
+    пустым — напр. иностранные эмитенты Form 4 не подают).
+    """
+    buys = []
+    try:
+        filings = F4.recent_form4(cik10)
+    except Exception:
+        return buys
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=INSIDER_WINDOW_DAYS)).strftime("%Y-%m-%d")
+    for f in filings:
+        if f["filing_date"] < cutoff:
+            continue
+        root = F4.fetch_form4_xml(cik10, f)
+        if root is None:
+            continue
+        parsed = F4.parse_form4(root)
+        for a in F4.aggregate(parsed["txns"]):
+            if a["code"] != "P":
+                continue
+            buys.append({
+                "insider": parsed["insider"], "title": parsed["title"],
+                "shares": a["shares"], "value": a["value"], "date": a["date"],
+                "filing_date": f["filing_date"],
+                "url": (f"https://www.sec.gov/Archives/edgar/data/{int(cik10)}/"
+                        f"{f['acc_nodash']}/{f['accession']}-index.htm"),
+            })
+    buys.sort(key=lambda b: b["value"], reverse=True)
+    return buys
+
+
 def build_alert(name, tk, r):
     e = notify.esc
     up = r["spring"]["coil_dir"] == "вверх"
@@ -205,10 +242,44 @@ def build_alert(name, tk, r):
             f"<i>Технический сигнал сжатия/разжатия, не прогноз.</i>")
 
 
+def fmt_usd(v):
+    v = abs(v)
+    if v >= 1e9:
+        return f"${v/1e9:.1f}B"
+    if v >= 1e6:
+        return f"${v/1e6:.1f}M"
+    if v >= 1e3:
+        return f"${v/1e3:.0f}K"
+    return f"${v:.0f}"
+
+
+def build_confluence_alert(name, tk, r):
+    """Сильный сигнал: пружина разжалась вверх И инсайдер покупает."""
+    e = notify.esc
+    cyc = r["cycle"]
+    mom = cyc["mom_120"]
+    b = r["insider_buys"][0]
+    shares = f"{b['shares']:,.0f}".replace(",", " ")
+    return (f"⭐ <b>СОВПАДЕНИЕ СИГНАЛОВ</b> · ${e(tk)} {e(name)}\n"
+            f"🧨 Пружина разжалась ↑ (пробой)  +  🟢 инсайдер покупает\n"
+            f"Инсайдер: <b>{e(b['insider'])}</b> — {e(b['title'])}, "
+            f"купил {shares} шт ≈ <b>{fmt_usd(b['value'])}</b> ({e(b['date'])})\n"
+            f"Цикл: <b>{e(cyc['phase'])}</b> · импульс "
+            f"{'+' if (mom or 0) > 0 else ''}{mom}% за 120д\n"
+            f"Цена {r['price']} · <a href=\"{e(b['url'])}\">Form 4</a>\n"
+            f"<i>Два независимых сигнала совпали — техника + инсайдер. Не рекомендация.</i>")
+
+
 def main():
     print("→ v2: циклы и сжатие пружины по производителям удобрений")
     results = {}
-    alerts = []
+    # Карту тикер→CIK грузим один раз (для проверки инсайдеров). Может не подняться.
+    try:
+        tmap = F4.load_ticker_map()
+    except Exception as ex:
+        print(f"  ⚠ карта CIK недоступна, инсайдерский слой пропущен ({ex})")
+        tmap = {}
+
     for p in PRODUCERS:
         try:
             csv_text = get(f"https://stooq.com/q/d/l/?s={p['symbol']}&i=d")
@@ -224,25 +295,45 @@ def main():
             print(f"  ✗ {p['ticker']}: мало истории")
             continue
         r["name"] = p["name"]
-        results[p["ticker"]] = r
         sp = r["spring"]
+
+        # Инсайдерский слой — только для бумаг со «взведённой вверх» пружиной
+        # (разжалась ↑ или взведена с bias вверх): там совпадение осмысленно.
+        r["insider_buys"] = []
+        r["confluence"] = False
+        r["accumulation"] = False
+        up_biased = sp["coil_dir"] == "вверх"
+        cik10 = tmap.get(p["ticker"].upper())
+        if up_biased and cik10:
+            buys = recent_insider_buys(cik10)[:3]
+            r["insider_buys"] = buys
+            if buys:
+                if sp["fired"]:
+                    r["confluence"] = True          # пружина стрельнула ↑ + покупка
+                elif sp["squeeze"]:
+                    r["accumulation"] = True        # взведена ↑ + покупка (накопление)
+
+        results[p["ticker"]] = r
+        tag = " ⭐СОВПАДЕНИЕ" if r["confluence"] else (" ◇накопление" if r["accumulation"] else "")
         print(f"  ✓ {p['ticker']}: {r['cycle']['phase']} · пружина {sp['status']} "
-              f"(BBW {sp['bbw_pctile']}%)")
-        if sp["fired"]:
-            alerts.append((p["name"], p["ticker"], r))
+              f"(BBW {sp['bbw_pctile']}%){tag}")
 
     # Сводка по сектору
     phases = {}
     squeezed = 0
-    for r in results.values():
+    confluence = []
+    for tk, r in results.items():
         phases[r["cycle"]["phase"]] = phases.get(r["cycle"]["phase"], 0) + 1
         if r["spring"]["squeeze"]:
             squeezed += 1
+        if r.get("confluence"):
+            confluence.append(tk)
 
     out = {
         "generated": datetime.now(timezone.utc).isoformat(),
         "producers": results,
-        "summary": {"phases": phases, "squeezed": squeezed, "total": len(results)},
+        "summary": {"phases": phases, "squeezed": squeezed,
+                    "total": len(results), "confluence": confluence},
     }
     path = OUT / "fertilizers.json"
     if not results and path.exists():
@@ -251,10 +342,18 @@ def main():
         path.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
         print(f"✓ Сохранено в {path} ({len(results)} эмитентов)")
 
-    for name, tk, r in alerts:
-        notify.send(build_alert(name, tk, r))
-    print(f"→ Разжатий пружины (алертов): {len(alerts)}" if alerts
-          else "→ Разжатий пружины нет — Telegram молчит.")
+    # Алерты: совпадение (сильное) вытесняет обычное разжатие для той же бумаги.
+    sent = 0
+    for tk, r in results.items():
+        if r.get("confluence"):
+            if notify.send(build_confluence_alert(r["name"], tk, r)):
+                sent += 1
+        elif r["spring"]["fired"]:
+            if notify.send(build_alert(r["name"], tk, r)):
+                sent += 1
+    if confluence:
+        print(f"→ ⭐ Совпадений (пружина↑ + инсайдер): {len(confluence)} — {', '.join(confluence)}")
+    print(f"→ Отправлено алертов: {sent}" if sent else "→ Сигналов нет — Telegram молчит.")
 
 
 if __name__ == "__main__":

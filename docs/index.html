@@ -356,17 +356,36 @@ function renderFertilizers(d){
   const s=d.summary||{};
   const phTxt=Object.entries(s.phases||{}).map(([k,v])=>`${k}: ${v}`).join(' · ');
   let html=`<div class="lbl">Удобрения · циклы и «сжатие пружины» (метод компрессии волатильности)</div>`;
+  const confList=s.confluence||[];
   html+=`<div class="warn" style="margin:0 0 16px"><b>СВОДКА ПО СЕКТОРУ</b>`+
-        `Фазы цикла — ${phTxt||'—'}. Пружина взведена у ${s.squeezed||0} из ${s.total||keys.length}. `+
-        `Это техническая карта напряжения, не прогноз.</div>`;
-  keys.forEach(tk=>{
+        `Фазы цикла — ${phTxt||'—'}. Пружина взведена у ${s.squeezed||0} из ${s.total||keys.length}.`+
+        (confList.length?` ⭐ Совпадений (пружина↑ + инсайдер): <b style="color:var(--green)">${confList.length}</b> — ${esc(confList.map(t=>'$'+t).join(', '))}.`:'')+
+        ` Это техническая карта напряжения, не прогноз.</div>`;
+  // Совпадения — вверх, затем накопление, затем остальные.
+  const order=keys.slice().sort((a,b)=>{
+    const rank=x=>prod[x].confluence?0:(prod[x].accumulation?1:2);
+    return rank(a)-rank(b);
+  });
+  order.forEach(tk=>{
     const r=prod[tk], cyc=r.cycle, sp=r.spring;
     const pc=phaseCol[cyc.phase]||'dim';
     const sc=springCol(sp.status);
     const pos=cyc.pct_52w!=null?cyc.pct_52w:0;
     const mom=cyc.mom_120!=null?((cyc.mom_120>0?'+':'')+cyc.mom_120+'%'):'—';
     const momCol=(cyc.mom_120||0)>0?'green':(cyc.mom_120<0?'red':'dim');
-    html+=`<div class="fund-block">
+    const conf=r.confluence, accu=r.accumulation;
+    const border=conf?'border-left:4px solid var(--green)':(accu?'border-left:4px solid var(--blue)':'');
+    let banner='';
+    if(conf) banner='<div class="warn" style="margin:0 0 12px;background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.4);color:var(--green)"><b>⭐ СОВПАДЕНИЕ СИГНАЛОВ</b>Пружина разжалась ↑ и инсайдер покупает — два независимых сигнала совпали.</div>';
+    else if(accu) banner='<div class="warn" style="margin:0 0 12px;background:rgba(96,165,250,.06);border-color:rgba(96,165,250,.35);color:var(--blue)"><b>◇ НАКОПЛЕНИЕ</b>Пружина взведена вверх и инсайдер покупает — сетап зреет.</div>';
+    const buys=r.insider_buys||[];
+    const buysHtml = buys.length
+      ? `<div style="margin-top:12px">
+           <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--muted);margin-bottom:6px">ИНСАЙДЕРСКИЕ ПОКУПКИ (Form 4)</div>
+           ${buys.map(b=>`<div class="move-row"><span class="tk">🟢 ${esc(b.insider)} · ${esc(b.title)}</span><span class="det">${fmtSh(b.shares)} шт ≈ ${fmtUSD(b.value)} · ${esc(b.date)}${b.url?` · <a href="${esc(b.url)}" target="_blank" rel="noopener" style="color:var(--muted)">SEC ↗</a>`:''}</span></div>`).join('')}</div>`
+      : '';
+    html+=`<div class="fund-block" style="${border}">
+      ${banner}
       <div class="signal-head" style="margin-bottom:12px">
         <span class="fund-name">$${esc(tk)}</span>
         <span style="color:var(--dim);font-size:12px">${esc(r.name||'')}</span>
@@ -381,6 +400,7 @@ function renderFertilizers(d){
         Положение в 52-нед. диапазоне: ${cyc.pct_52w!=null?cyc.pct_52w+'%':'—'} · над 200MA: ${cyc.above_200?'да':'нет'} · сжатие BBW: ${sp.bbw_pctile!=null?sp.bbw_pctile+'%':'—'} перцентиль</div>
       <div style="height:6px;background:var(--panel2);border-radius:3px;overflow:hidden">
         <div style="height:100%;width:${pos}%;background:var(--${pc})"></div></div>
+      ${buysHtml}
     </div>`;
   });
   el.innerHTML=html;
