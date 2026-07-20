@@ -26,8 +26,9 @@ smart-money-monitor v2 — циклы и «сжатие пружины» по п
 import json
 from datetime import datetime, timezone, timedelta
 
-from fetch_13f import get, OUT
+from fetch_13f import OUT
 import fetch_form4 as F4
+import marketdata
 import notify
 
 # Окно, в котором инсайдерская покупка считается совпадающей с разжатием пружины.
@@ -281,14 +282,9 @@ def main():
         tmap = {}
 
     for p in PRODUCERS:
-        try:
-            csv_text = get(f"https://stooq.com/q/d/l/?s={p['symbol']}&i=d")
-        except Exception as ex:
-            print(f"  ✗ {p['ticker']}: источник недоступен ({ex})")
-            continue
-        data = parse_ohlc(csv_text)
+        data, info = marketdata.daily(p["symbol"])
         if not data:
-            print(f"  ✗ {p['ticker']}: нет данных")
+            print(f"  ✗ {p['ticker']}: {info}")
             continue
         r = analyze(data)
         if not r:

@@ -324,10 +324,17 @@ function renderMacro(m){
           <span style="color:var(--muted)"> · ${esc(i.date||'')}</span></div></div>`;
     });
   } else {
-    html+='<div class="lbl">Макро-индикаторы</div>'+
-      '<div class="signal"><div class="signal-body" style="color:var(--muted)">'+
-      'Данные появятся после первого запуска сбора макро (Stooq). Если пусто и после прогона — '+
-      'источник мог быть недоступен; это не влияет на остальные вкладки.</div></div>';
+    html+='<div class="lbl">Макро-индикаторы</div>';
+    const errs=(m&&m.errors)||{};
+    const ek=Object.keys(errs);
+    if(ek.length){
+      html+='<div class="err">Источники котировок не ответили (Stooq/Yahoo). Причины:<br>'+
+        ek.map(k=>`• <b>${esc(k)}</b>: ${esc(errs[k])}`).join('<br>')+
+        '<br><br>Это не влияет на остальные вкладки. Часто помогает повторный запуск (лимиты по IP).</div>';
+    } else {
+      html+='<div class="signal"><div class="signal-body" style="color:var(--muted)">'+
+        'Данные появятся после первого запуска сбора макро.</div></div>';
+    }
   }
   const mw=(m&&m.manual_watch)||[];
   if(mw.length){
