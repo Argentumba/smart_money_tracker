@@ -30,6 +30,9 @@ import marketdata
 import notify
 
 FRED_CSV = "https://fred.stlouisfed.org/graph/fredgraph.csv?id={id}"
+# DBnomics зеркалит серии FRED через JSON-API без ключа и, в отличие от самого
+# FRED, отвечает с IP GitHub Actions (FRED оттуда стабильно таймаутит).
+DBNOMICS = "https://api.db.nomics.world/v22/series/FRED/{id}?observations=1"
 
 # id FRED, человекочитаемый label, цикл, единица.
 INDICATORS = [
@@ -100,6 +103,41 @@ def parse_fred(csv_text):
         except ValueError:
             continue
     return out
+
+
+def fetch_series(fred_id):
+    """Дневной/мес. ряд FRED-серии: DBnomics (осн.) → FRED CSV (фолбэк).
+
+    Возвращает (series [(date,float)] старые→новые, source|reason)."""
+    db_err = "dbnomics: пусто"
+    try:
+        d = json.loads(marketdata._raw(DBNOMICS.format(id=fred_id), timeout=15, retries=1))
+        docs = (d.get("series") or {}).get("docs") or []
+        if docs:
+            periods = docs[0].get("period") or []
+            values = docs[0].get("value") or []
+            out = []
+            for p, v in zip(periods, values):
+                if v in (None, "NA", "."):
+                    continue
+                if len(p) == 7:      # месячные периоды 'YYYY-MM' → 'YYYY-MM-01'
+                    p = p + "-01"
+                try:
+                    out.append((p, float(v)))
+                except (ValueError, TypeError):
+                    continue
+            if len(out) >= 2:
+                return out, "dbnomics"
+    except Exception as e:
+        db_err = f"dbnomics: {str(e)[:50]}"
+    # фолбэк на FRED CSV (может таймаутить с IP Actions — короткий таймаут)
+    try:
+        series = parse_fred(marketdata._raw(FRED_CSV.format(id=fred_id), timeout=12, retries=1))
+        if len(series) >= 2:
+            return series, "fred"
+        return [], f"{db_err}; fred: мало данных"
+    except Exception as e:
+        return [], f"{db_err}; fred: {str(e)[:40]}"
 
 
 def val_ago(series, days):
@@ -206,7 +244,7 @@ def phase_from(score, curve_inverted, claims_rising):
 
 
 def main():
-    print("→ Экономический цикл (FRED, keyless)")
+    print("→ Экономический цикл (DBnomics → FRED)")
     cycles = {"Жюгляр": [], "Китчин": [], "Кондратьев": []}
     errors = {}
     score = 0
@@ -214,18 +252,10 @@ def main():
     claims_rising = False
 
     for cfg in INDICATORS:
-        try:
-            # Короткий таймаут без ретраев: если FRED недоступен с IP Actions,
-            # падаем быстро (иначе шаг висит и блокирует коммит остальных данных).
-            csv_text = marketdata._raw(FRED_CSV.format(id=cfg["id"]), timeout=12, retries=1)
-        except Exception as e:
-            errors[cfg["label"]] = str(e)[:80]
-            print(f"  ✗ {cfg['label']}: {e}")
-            continue
-        series = parse_fred(csv_text)
+        series, src = fetch_series(cfg["id"])
         if len(series) < 2:
-            errors[cfg["label"]] = "нет данных"
-            print(f"  ✗ {cfg['label']}: нет данных")
+            errors[cfg["label"]] = src
+            print(f"  ✗ {cfg['label']}: {src}")
             continue
         s, note, latest, prior, ldate = signal_for(cfg["id"], series)
         if cfg["cycle"] != "Кондратьев":
