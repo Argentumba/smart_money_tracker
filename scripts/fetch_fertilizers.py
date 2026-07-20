@@ -174,6 +174,18 @@ def analyze(data):
     else:
         status, coil = "расслаблена", "—"
 
+    # Подтверждение объёмом: сегодняшний объём против среднего за 20 дней.
+    # Пробой на аномальном объёме (×2+) — куда более значимый сигнал.
+    vol = data.get("volume") or []
+    vol_ratio = None
+    if len(vol) > 21 and vol[-1] > 0:
+        base = [x for x in vol[-21:-1] if x > 0]
+        if base:
+            avg = sum(base) / len(base)
+            if avg > 0:
+                vol_ratio = round(vol[-1] / avg, 1)
+    vol_spike = vol_ratio is not None and vol_ratio >= 2.0
+
     a = atr(h, l, c)
     return {
         "price": round(last, 2),
@@ -191,6 +203,8 @@ def analyze(data):
             "fired": bool(fired),
             "status": status,
             "coil_dir": coil,
+            "vol_ratio": vol_ratio,
+            "vol_confirm": bool(fired and vol_spike),
         },
     }
 

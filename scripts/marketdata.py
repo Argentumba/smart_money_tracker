@@ -66,7 +66,7 @@ def _raw(url, timeout=30, retries=3):
 
 
 def _empty():
-    return {"date": [], "open": [], "high": [], "low": [], "close": []}
+    return {"date": [], "open": [], "high": [], "low": [], "close": [], "volume": []}
 
 
 def from_stooq(stooq_symbol):
@@ -85,9 +85,13 @@ def from_stooq(stooq_symbol):
             o, h, l, c = float(p[1]), float(p[2]), float(p[3]), float(p[4])
         except ValueError:
             continue
+        try:
+            vol = float(p[5]) if len(p) > 5 and p[5] not in ("", "N/D") else 0.0
+        except ValueError:
+            vol = 0.0
         out["date"].append(p[0])
         out["open"].append(o); out["high"].append(h)
-        out["low"].append(l); out["close"].append(c)
+        out["low"].append(l); out["close"].append(c); out["volume"].append(vol)
     return (out, None) if out["close"] else (None, "stooq: нет строк")
 
 
@@ -109,6 +113,7 @@ def from_yahoo(stooq_symbol, rng="1y"):
     opens = q.get("open") or []
     highs = q.get("high") or []
     lows = q.get("low") or []
+    vols = q.get("volume") or []
     out = _empty()
     for i, t in enumerate(ts):
         c = closes[i] if i < len(closes) else None
@@ -117,9 +122,10 @@ def from_yahoo(stooq_symbol, rng="1y"):
         o = opens[i] if i < len(opens) and opens[i] is not None else c
         h = highs[i] if i < len(highs) and highs[i] is not None else c
         l = lows[i] if i < len(lows) and lows[i] is not None else c
+        v = vols[i] if i < len(vols) and vols[i] is not None else 0.0
         out["date"].append(datetime.datetime.utcfromtimestamp(t).strftime("%Y-%m-%d"))
         out["open"].append(o); out["high"].append(h)
-        out["low"].append(l); out["close"].append(c)
+        out["low"].append(l); out["close"].append(c); out["volume"].append(v)
     return (out, None) if out["close"] else (None, "yahoo: пустой ряд")
 
 
@@ -136,9 +142,13 @@ def _td_parse(obj):
             l, c = float(v["low"]), float(v["close"])
         except (KeyError, ValueError, TypeError):
             continue
+        try:
+            vol = float(v.get("volume")) if v.get("volume") not in (None, "") else 0.0
+        except (ValueError, TypeError):
+            vol = 0.0
         out["date"].append(v.get("datetime", ""))
         out["open"].append(o); out["high"].append(h)
-        out["low"].append(l); out["close"].append(c)
+        out["low"].append(l); out["close"].append(c); out["volume"].append(vol)
     return (out, None) if out["close"] else (None, "td: пустой ряд")
 
 

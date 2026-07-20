@@ -231,7 +231,21 @@ function renderInsiders(d){
       '</div></div>';
     return;
   }
-  let html='<div class="lbl">Сделки инсайдеров · Form 4 · задержка ~2 дня</div>';
+  let html='';
+  const clusters=(d&&d.clusters)||[];
+  if(clusters.length){
+    html+='<div class="lbl">⚡ Кластеры инсайдеров — несколько топов в одну сторону</div>';
+    clusters.forEach(c=>{
+      const buy=c.direction==='buy';
+      const cls=buy?'match':'conflict', tag=buy?'t-match':'t-conflict';
+      const strong=c.count>=3?' · СИЛЬНЫЙ':'';
+      html+=`<div class="signal ${cls}"><div class="signal-head">
+        <span class="signal-ticker">$${esc(c.ticker)}</span>
+        <span class="signal-tag ${tag}">${buy?'🟢🟢 КЛАСТЕР ПОКУПОК':'🔴🔴 КЛАСТЕР ПРОДАЖ'}${strong}</span></div>
+        <div class="signal-body"><b>${c.count}</b> разных инсайдера за 30 дней: ${esc((c.insiders||[]).join(', '))} · суммарно <b>${fmtUSD(c.total_value)}</b></div></div>`;
+    });
+  }
+  html+='<div class="lbl">Сделки инсайдеров · Form 4 · задержка ~2 дня</div>';
   txns.forEach(r=>{
     (r.trades||[]).forEach(t=>{
       const buy=t.code==='P';
@@ -402,7 +416,7 @@ function renderFertilizers(d){
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
         <span class="signal-tag" style="background:rgba(0,0,0,.2);color:var(--${pc})">ЦИКЛ: ${esc(cyc.phase)}</span>
-        <span class="signal-tag" style="background:rgba(0,0,0,.2);color:var(--${sc})">🧨 ПРУЖИНА: ${esc(sp.status)}${sp.coil_dir&&sp.coil_dir!=='—'&&sp.status==='взведена'?' ('+esc(sp.coil_dir)+')':''}</span>
+        <span class="signal-tag" style="background:rgba(0,0,0,.2);color:var(--${sc})">🧨 ПРУЖИНА: ${esc(sp.status)}${sp.coil_dir&&sp.coil_dir!=='—'&&sp.status==='взведена'?' ('+esc(sp.coil_dir)+')':''}${sp.vol_confirm?' · 📊 объём ×'+sp.vol_ratio:''}</span>
         <span class="signal-tag" style="background:rgba(0,0,0,.2);color:var(--${momCol})">Импульс 120д: ${mom}</span>
       </div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:4px">
