@@ -31,8 +31,13 @@ import notify
 
 FRED_CSV = "https://fred.stlouisfed.org/graph/fredgraph.csv?id={id}"
 # DBnomics зеркалит серии FRED через JSON-API без ключа и, в отличие от самого
-# FRED, отвечает с IP GitHub Actions (FRED оттуда стабильно таймаутит).
-DBNOMICS = "https://api.db.nomics.world/v22/series/FRED/{id}?observations=1"
+# FRED, отвечает с IP GitHub Actions (FRED оттуда таймаутит; DBnomics даёт 404).
+# У FRED на DBnomics путь provider/dataset/series; пробуем несколько форматов.
+DBNOMICS_CANDIDATES = [
+    "https://api.db.nomics.world/v22/series/FRED/{id}/{id}?observations=1",
+    "https://api.db.nomics.world/v22/series?series_ids=FRED/{id}/{id}&observations=1",
+    "https://api.db.nomics.world/v22/series?observations=1&provider_code=FRED&series_code={id}",
+]
 
 # id FRED, человекочитаемый label, цикл, единица.
 INDICATORS = [
@@ -105,31 +110,51 @@ def parse_fred(csv_text):
     return out
 
 
+def _parse_dbnomics(txt):
+    d = json.loads(txt)
+    docs = (d.get("series") or {}).get("docs") or []
+    if not docs:
+        return []
+    periods = docs[0].get("period") or []
+    values = docs[0].get("value") or []
+    out = []
+    for p, v in zip(periods, values):
+        if v in (None, "NA", "."):
+            continue
+        if len(p) == 7:              # месячные периоды 'YYYY-MM' → 'YYYY-MM-01'
+            p = p + "-01"
+        try:
+            out.append((p, float(v)))
+        except (ValueError, TypeError):
+            continue
+    return out
+
+
 def fetch_series(fred_id):
-    """Дневной/мес. ряд FRED-серии: DBnomics (осн.) → FRED CSV (фолбэк).
+    """Ряд FRED-серии: DBnomics (несколько форматов URL) → FRED CSV (фолбэк).
 
     Возвращает (series [(date,float)] старые→новые, source|reason)."""
-    db_err = "dbnomics: пусто"
-    try:
-        d = json.loads(marketdata._raw(DBNOMICS.format(id=fred_id), timeout=15, retries=1))
-        docs = (d.get("series") or {}).get("docs") or []
-        if docs:
-            periods = docs[0].get("period") or []
-            values = docs[0].get("value") or []
-            out = []
-            for p, v in zip(periods, values):
-                if v in (None, "NA", "."):
-                    continue
-                if len(p) == 7:      # месячные периоды 'YYYY-MM' → 'YYYY-MM-01'
-                    p = p + "-01"
-                try:
-                    out.append((p, float(v)))
-                except (ValueError, TypeError):
-                    continue
-            if len(out) >= 2:
-                return out, "dbnomics"
-    except Exception as e:
-        db_err = f"dbnomics: {str(e)[:50]}"
+    import urllib.error
+    db_err = "dbnomics: нет"
+    for tmpl in DBNOMICS_CANDIDATES:
+        try:
+            txt = marketdata._raw(tmpl.format(id=fred_id), timeout=15, retries=1)
+            series = _parse_dbnomics(txt)
+            if len(series) >= 2:
+                return series, "dbnomics"
+            db_err = "dbnomics: пустой ряд"
+        except urllib.error.HTTPError as e:
+            body = ""
+            try:
+                body = " " + e.read(120).decode("utf-8", "ignore").replace("\n", " ")
+            except Exception:
+                pass
+            db_err = f"dbnomics: {e.code}{body}"[:110]
+            if e.code != 404:
+                break  # не 404 (напр. 429/5xx) — дальше форматы не помогут
+        except Exception as e:
+            db_err = f"dbnomics: {str(e)[:40]}"
+            break
     # фолбэк на FRED CSV (может таймаутить с IP Actions — короткий таймаут)
     try:
         series = parse_fred(marketdata._raw(FRED_CSV.format(id=fred_id), timeout=12, retries=1))
@@ -137,7 +162,7 @@ def fetch_series(fred_id):
             return series, "fred"
         return [], f"{db_err}; fred: мало данных"
     except Exception as e:
-        return [], f"{db_err}; fred: {str(e)[:40]}"
+        return [], f"{db_err}; fred: {str(e)[:30]}"
 
 
 def val_ago(series, days):
@@ -298,8 +323,10 @@ def main():
         except Exception:
             pass
 
-    if not have_any and path.exists():
-        print("→ Ничего не собрано — оставляю прежний cycles.json.")
+    # Оставляем прежний файл только если он был реально хорошим (была фаза);
+    # иначе перезаписываем свежими ошибками, чтобы на дашборде была актуальная причина.
+    if not have_any and prev_phase:
+        print("→ Ничего не собрано — оставляю прежний (хороший) cycles.json.")
     else:
         path.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
         print(f"✓ Сохранено в {path} · фаза: {phase} · скор: {score:+d}")
