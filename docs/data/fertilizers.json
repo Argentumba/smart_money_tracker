@@ -1,9 +1,183 @@
 {
-  "generated": "2026-07-20T10:13:29.539140+00:00",
-  "producers": {},
+  "generated": "2026-07-20T15:00:02.184362+00:00",
+  "producers": {
+    "CF": {
+      "price": 125.01,
+      "date": "2026-07-20",
+      "cycle": {
+        "phase": "Экспансия",
+        "pct_52w": 80,
+        "above_200": true,
+        "mom_120": 36.4,
+        "atr_pct": 3.4
+      },
+      "spring": {
+        "bbw_pctile": 82,
+        "squeeze": false,
+        "fired": false,
+        "status": "расслаблена",
+        "coil_dir": "—",
+        "vol_ratio": 0.1,
+        "vol_confirm": false
+      },
+      "name": "CF Industries (азот)",
+      "insider_buys": [],
+      "confluence": false,
+      "accumulation": false
+    },
+    "NTR": {
+      "price": 66.83,
+      "date": "2026-07-20",
+      "cycle": {
+        "phase": "Пик / замедление",
+        "pct_52w": 44,
+        "above_200": true,
+        "mom_120": -4.8,
+        "atr_pct": 2.6
+      },
+      "spring": {
+        "bbw_pctile": 80,
+        "squeeze": false,
+        "fired": false,
+        "status": "расслаблена",
+        "coil_dir": "—",
+        "vol_ratio": 0.1,
+        "vol_confirm": false
+      },
+      "name": "Nutrien (диверс.)",
+      "insider_buys": [],
+      "confluence": false,
+      "accumulation": false
+    },
+    "MOS": {
+      "price": 21.98,
+      "date": "2026-07-20",
+      "cycle": {
+        "phase": "Спад",
+        "pct_52w": 12,
+        "above_200": false,
+        "mom_120": -22.4,
+        "atr_pct": 3.9
+      },
+      "spring": {
+        "bbw_pctile": 10,
+        "squeeze": true,
+        "fired": false,
+        "status": "взведена",
+        "coil_dir": "вниз",
+        "vol_ratio": 0.0,
+        "vol_confirm": false
+      },
+      "name": "Mosaic (калий/фосфат)",
+      "insider_buys": [],
+      "confluence": false,
+      "accumulation": false
+    },
+    "IPI": {
+      "price": 34.38,
+      "date": "2026-07-20",
+      "cycle": {
+        "phase": "Экспансия",
+        "pct_52w": 42,
+        "above_200": true,
+        "mom_120": 3.5,
+        "atr_pct": 3.7
+      },
+      "spring": {
+        "bbw_pctile": 1,
+        "squeeze": true,
+        "fired": false,
+        "status": "взведена",
+        "coil_dir": "нейтр.",
+        "vol_ratio": 0.0,
+        "vol_confirm": false
+      },
+      "name": "Intrepid Potash",
+      "insider_buys": [],
+      "confluence": false,
+      "accumulation": false
+    },
+    "UAN": {
+      "price": 120.43,
+      "date": "2026-07-20",
+      "cycle": {
+        "phase": "Экспансия",
+        "pct_52w": 65,
+        "above_200": true,
+        "mom_120": 18.1,
+        "atr_pct": 2.6
+      },
+      "spring": {
+        "bbw_pctile": 22,
+        "squeeze": false,
+        "fired": true,
+        "status": "разжалась ↑",
+        "coil_dir": "вверх",
+        "vol_ratio": 0.0,
+        "vol_confirm": false
+      },
+      "name": "CVR Partners (азот)",
+      "insider_buys": [],
+      "confluence": false,
+      "accumulation": false
+    },
+    "SQM": {
+      "price": 67.7,
+      "date": "2026-07-20",
+      "cycle": {
+        "phase": "Спад",
+        "pct_52w": 54,
+        "above_200": false,
+        "mom_120": -19.4,
+        "atr_pct": 4.3
+      },
+      "spring": {
+        "bbw_pctile": 15,
+        "squeeze": true,
+        "fired": false,
+        "status": "взведена",
+        "coil_dir": "нейтр.",
+        "vol_ratio": 0.0,
+        "vol_confirm": false
+      },
+      "name": "SQM (калий/литий)",
+      "insider_buys": [],
+      "confluence": false,
+      "accumulation": false
+    },
+    "ICL": {
+      "price": 5.02,
+      "date": "2026-07-20",
+      "cycle": {
+        "phase": "Спад",
+        "pct_52w": 10,
+        "above_200": false,
+        "mom_120": -6.9,
+        "atr_pct": 2.1
+      },
+      "spring": {
+        "bbw_pctile": 1,
+        "squeeze": true,
+        "fired": false,
+        "status": "взведена",
+        "coil_dir": "вниз",
+        "vol_ratio": 0.1,
+        "vol_confirm": false
+      },
+      "name": "ICL Group",
+      "insider_buys": [],
+      "confluence": false,
+      "accumulation": false
+    }
+  },
   "summary": {
-    "phases": {},
-    "squeezed": 0,
-    "total": 0
+    "phases": {
+      "Экспансия": 3,
+      "Пик / замедление": 1,
+      "Спад": 3
+    },
+    "squeezed": 4,
+    "total": 7,
+    "confluence": []
   }
 }
