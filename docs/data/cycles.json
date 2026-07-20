@@ -1,0 +1,28 @@
+{
+  "generated": "2026-07-20T14:53:37.300989+00:00",
+  "phase": null,
+  "score": 0,
+  "curve_inverted": false,
+  "cycles": {
+    "Жюгляр": [],
+    "Китчин": [],
+    "Кондратьев": []
+  },
+  "allocation": {},
+  "lead": [],
+  "lag": [],
+  "note": "",
+  "kondratieff_note": "Оценочно: переход в повышательную фазу 6-го К-цикла (ИИ + зелёная энергетика). Датировка К-циклов спорна.",
+  "errors": {
+    "Кривая доходности 10Y−2Y": "The read operation timed out",
+    "Кредитный спред HY (OAS)": "The read operation timed out",
+    "Загрузка мощностей": "The read operation timed out",
+    "Безработица": "The read operation timed out",
+    "Пром. производство (г/г)": "The read operation timed out",
+    "Запасы / продажи": "The read operation timed out",
+    "Заявки на пособие": "The read operation timed out",
+    "Разрешения на строительство": "The read operation timed out",
+    "Настроения потребителей": "The read operation timed out",
+    "Реальная ставка 10Y (TIPS)": "The read operation timed out"
+  }
+}

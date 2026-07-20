@@ -1,6 +1,95 @@
 {
-  "generated": "2026-07-19T11:51:17.137850+00:00",
-  "indicators": [],
+  "generated": "2026-07-20T14:50:41.822864+00:00",
+  "indicators": [
+    {
+      "key": "brent",
+      "label": "Нефть Brent (BNO)",
+      "unit": "$",
+      "price": 48.85,
+      "change_1d": 0.31,
+      "change_5d": 6.2,
+      "date": "2026-07-20",
+      "alert": false,
+      "source": "twelvedata"
+    },
+    {
+      "key": "wti",
+      "label": "Нефть WTI (USO)",
+      "unit": "$",
+      "price": 124.28,
+      "change_1d": 0.26,
+      "change_5d": 5.51,
+      "date": "2026-07-20",
+      "alert": false,
+      "source": "twelvedata"
+    },
+    {
+      "key": "natgas",
+      "label": "Природный газ (UNG)",
+      "unit": "$",
+      "price": 10.29,
+      "change_1d": -2.09,
+      "change_5d": -0.77,
+      "date": "2026-07-20",
+      "alert": false,
+      "source": "twelvedata"
+    },
+    {
+      "key": "gold",
+      "label": "Золото (GLD)",
+      "unit": "$",
+      "price": 368.19,
+      "change_1d": -0.06,
+      "change_5d": 0.29,
+      "date": "2026-07-20",
+      "alert": false,
+      "source": "twelvedata"
+    },
+    {
+      "key": "wheat",
+      "label": "Пшеница (WEAT)",
+      "unit": "$",
+      "price": 25.12,
+      "change_1d": -0.51,
+      "change_5d": 6.17,
+      "date": "2026-07-20",
+      "alert": false,
+      "source": "twelvedata"
+    },
+    {
+      "key": "corn",
+      "label": "Кукуруза (CORN)",
+      "unit": "$",
+      "price": 17.93,
+      "change_1d": 0.84,
+      "change_5d": 2.17,
+      "date": "2026-07-20",
+      "alert": false,
+      "source": "twelvedata"
+    },
+    {
+      "key": "agri",
+      "label": "Агробизнес (MOO)",
+      "unit": "$",
+      "price": 82.17,
+      "change_1d": -0.44,
+      "change_5d": 0.85,
+      "date": "2026-07-20",
+      "alert": false,
+      "source": "twelvedata"
+    },
+    {
+      "key": "dxy",
+      "label": "Доллар (UUP)",
+      "unit": "$",
+      "price": 28.41,
+      "change_1d": 0.28,
+      "change_5d": -0.32,
+      "date": "2026-07-20",
+      "alert": false,
+      "source": "twelvedata"
+    }
+  ],
   "manual_watch": [
     {
       "label": "Карбамид (Middle East urea FOB)",
@@ -17,5 +106,6 @@
       "why": "Итоговый барометр продбезопасности (запаздывает; фьючерсы зерна опережают).",
       "url": "https://www.fao.org/worldfoodsituation/foodpricesindex/en/"
     }
-  ]
+  ],
+  "errors": {}
 }
