@@ -1,18 +1,18 @@
 {
-  "generated": "2026-07-20T15:00:02.184362+00:00",
+  "generated": "2026-07-20T15:10:38.039187+00:00",
   "producers": {
     "CF": {
-      "price": 125.01,
+      "price": 124.26,
       "date": "2026-07-20",
       "cycle": {
         "phase": "Экспансия",
-        "pct_52w": 80,
+        "pct_52w": 78,
         "above_200": true,
-        "mom_120": 36.4,
+        "mom_120": 35.6,
         "atr_pct": 3.4
       },
       "spring": {
-        "bbw_pctile": 82,
+        "bbw_pctile": 81,
         "squeeze": false,
         "fired": false,
         "status": "расслаблена",
@@ -26,13 +26,13 @@
       "accumulation": false
     },
     "NTR": {
-      "price": 66.83,
+      "price": 66.65,
       "date": "2026-07-20",
       "cycle": {
         "phase": "Пик / замедление",
-        "pct_52w": 44,
+        "pct_52w": 43,
         "above_200": true,
-        "mom_120": -4.8,
+        "mom_120": -5.1,
         "atr_pct": 2.6
       },
       "spring": {
@@ -50,14 +50,14 @@
       "accumulation": false
     },
     "MOS": {
-      "price": 21.98,
+      "price": 22.02,
       "date": "2026-07-20",
       "cycle": {
         "phase": "Спад",
-        "pct_52w": 12,
+        "pct_52w": 13,
         "above_200": false,
-        "mom_120": -22.4,
-        "atr_pct": 3.9
+        "mom_120": -22.3,
+        "atr_pct": 3.8
       },
       "spring": {
         "bbw_pctile": 10,
@@ -65,7 +65,7 @@
         "fired": false,
         "status": "взведена",
         "coil_dir": "вниз",
-        "vol_ratio": 0.0,
+        "vol_ratio": 0.1,
         "vol_confirm": false
       },
       "name": "Mosaic (калий/фосфат)",
@@ -74,13 +74,13 @@
       "accumulation": false
     },
     "IPI": {
-      "price": 34.38,
+      "price": 34.3,
       "date": "2026-07-20",
       "cycle": {
         "phase": "Экспансия",
         "pct_52w": 42,
         "above_200": true,
-        "mom_120": 3.5,
+        "mom_120": 3.2,
         "atr_pct": 3.7
       },
       "spring": {
@@ -122,17 +122,17 @@
       "accumulation": false
     },
     "SQM": {
-      "price": 67.7,
+      "price": 67.94,
       "date": "2026-07-20",
       "cycle": {
         "phase": "Спад",
         "pct_52w": 54,
         "above_200": false,
-        "mom_120": -19.4,
-        "atr_pct": 4.3
+        "mom_120": -19.1,
+        "atr_pct": 4.2
       },
       "spring": {
-        "bbw_pctile": 15,
+        "bbw_pctile": 14,
         "squeeze": true,
         "fired": false,
         "status": "взведена",
@@ -146,13 +146,13 @@
       "accumulation": false
     },
     "ICL": {
-      "price": 5.02,
+      "price": 5.01,
       "date": "2026-07-20",
       "cycle": {
         "phase": "Спад",
         "pct_52w": 10,
         "above_200": false,
-        "mom_120": -6.9,
+        "mom_120": -7.0,
         "atr_pct": 2.1
       },
       "spring": {
