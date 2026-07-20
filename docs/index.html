@@ -75,6 +75,7 @@
 
   <div class="tabs">
     <div class="tab active" data-view="overlap">⚡ Пересечения с портфелем</div>
+    <div class="tab" data-view="cycles">🌀 Циклы</div>
     <div class="tab" data-view="themes">🧭 Темы</div>
     <div class="tab" data-view="funds">🏦 Движения фондов</div>
     <div class="tab" data-view="insiders">🕵️ Инсайдеры (Form 4)</div>
@@ -83,6 +84,7 @@
   </div>
 
   <div class="view active" id="overlap"><div class="loading">Загрузка…</div></div>
+  <div class="view" id="cycles"><div class="loading">Загрузка…</div></div>
   <div class="view" id="themes"><div class="loading">Загрузка…</div></div>
   <div class="view" id="funds"><div class="loading">Загрузка…</div></div>
   <div class="view" id="insiders"><div class="loading">Загрузка…</div></div>
@@ -413,6 +415,56 @@ function renderFertilizers(d){
   el.innerHTML=html;
 }
 
+function renderCycles(d){
+  const el=document.getElementById('cycles');
+  if(!d||!d.phase){
+    let msg='Данные появятся после первого запуска сбора циклов (FRED).';
+    const errs=(d&&d.errors)||{};
+    if(Object.keys(errs).length) msg='Источник FRED не ответил: '+esc(Object.values(errs)[0]);
+    el.innerHTML='<div class="lbl">Экономический цикл</div><div class="signal"><div class="signal-body" style="color:var(--muted)">'+msg+'</div></div>';
+    return;
+  }
+  const phaseCol={'Восстановление':'blue','Экспансия':'green','Замедление':'amber','Рецессия':'red'};
+  const pc=phaseCol[d.phase]||'dim';
+  const sigCol=s=>s>0?'green':(s<0?'red':'muted');
+  const sigTxt=s=>s>0?'▲ плюс':(s<0?'▼ минус':'• нейтр');
+  // Шапка: фаза + композит
+  let html=`<div class="lbl">Экономический цикл · деловой цикл рынка (Жюгляр/Китчин) · FRED</div>`;
+  html+=`<div class="fund-block" style="border-left:4px solid var(--${pc})">
+    <div class="signal-head" style="margin-bottom:8px">
+      <span class="fund-name" style="color:var(--${pc})">Фаза: ${esc(d.phase)}</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:13px;margin-left:auto">композит ${d.score>0?'+':''}${d.score}${d.curve_inverted?' · ⚠ инверсия кривой':''}</span>
+    </div>
+    <div class="signal-body" style="color:var(--dim)">${esc(d.note||'')}</div>`;
+  // Секторная ротация
+  const al=d.allocation||{};
+  if(Object.keys(al).length){
+    html+=`<div class="lbl" style="margin:16px 0 8px">Рекомендуемое позиционирование (методология, не совет)</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">`+
+      Object.entries(al).map(([k,v])=>`<span class="signal-tag" style="background:var(--panel2)">${esc(k)}: <b>${v}%</b></span>`).join('')+`</div>`;
+    html+=`<div style="font-size:12px;color:var(--dim)">🟢 Лидеры: ${esc((d.lead||[]).join(', '))}<br>🔴 Отстают: ${esc((d.lag||[]).join(', '))}</div>`;
+  }
+  html+=`</div>`;
+  // Индикаторы по циклам
+  const order=['Жюгляр','Китчин','Кондратьев'];
+  const titles={'Жюгляр':'🔧 Жюгляр (7–11 лет · деловой цикл)','Китчин':'📦 Китчин (2–4 года · запасы)','Кондратьев':'🌐 Кондратьев (45–60 лет · долгосрочный)'};
+  order.forEach(cy=>{
+    const inds=(d.cycles||{})[cy]||[];
+    if(!inds.length)return;
+    html+=`<div class="fund-block"><div class="fund-name" style="font-size:15px;margin-bottom:10px">${titles[cy]}</div>`;
+    inds.forEach(i=>{
+      html+=`<div class="th-row" style="flex-wrap:wrap;gap:6px">
+        <span style="min-width:200px"><b>${esc(i.label)}</b> <span style="color:var(--muted);font-size:11px">${i.value} ${esc(i.unit||'')}</span></span>
+        <span style="color:var(--${sigCol(i.signal)});font-family:'JetBrains Mono',monospace;font-size:11px;min-width:64px">${sigTxt(i.signal)}</span>
+        <span style="flex:1;font-size:11px;color:var(--dim);min-width:180px">${esc(i.note||'')}</span></div>`;
+    });
+    if(cy==='Кондратьев'&&d.kondratieff_note) html+=`<div style="font-size:11px;color:var(--muted);margin-top:8px;font-style:italic">${esc(d.kondratieff_note)}</div>`;
+    html+=`</div>`;
+  });
+  html+=`<div class="warn" style="margin-top:8px"><b>ОГОВОРКА</b>Вероятностный инструмент, не рекомендация. Фазы надёжно датируются задним числом; макроданные с лагом; К-цикл без научного консенсуса.</div>`;
+  el.innerHTML=html;
+}
+
 async function load(){
   tabs();
   try{
@@ -437,6 +489,10 @@ async function load(){
     const r=await fetch('data/fertilizers.json?'+Date.now());
     renderFertilizers(r.ok ? await r.json() : null);
   }catch(e){ renderFertilizers(null); }
+  try{
+    const r=await fetch('data/cycles.json?'+Date.now());
+    renderCycles(r.ok ? await r.json() : null);
+  }catch(e){ renderCycles(null); }
 }
 load();
 </script>

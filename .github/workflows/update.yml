@@ -41,11 +41,14 @@ jobs:
       - name: Analyze fertilizer producers (cycles + coiled spring)
         run: python3 scripts/fetch_fertilizers.py
 
+      - name: Analyze economic cycle (FRED)
+        run: python3 scripts/fetch_cycles.py
+
       - name: Commit updated data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/data/funds.json docs/data/insiders.json docs/data/macro.json docs/data/fertilizers.json
+          git add docs/data/funds.json docs/data/insiders.json docs/data/macro.json docs/data/fertilizers.json docs/data/cycles.json
           if git diff --staged --quiet; then
             echo "No changes — data unchanged."
           else
