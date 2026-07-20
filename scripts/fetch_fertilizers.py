@@ -281,8 +281,9 @@ def main():
         print(f"  ⚠ карта CIK недоступна, инсайдерский слой пропущен ({ex})")
         tmap = {}
 
+    batch = marketdata.daily_batch([p["symbol"] for p in PRODUCERS])
     for p in PRODUCERS:
-        data, info = marketdata.daily(p["symbol"])
+        data, info = batch.get(p["symbol"], (None, "нет ответа"))
         if not data:
             print(f"  ✗ {p['ticker']}: {info}")
             continue

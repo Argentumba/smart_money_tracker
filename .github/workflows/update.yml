@@ -17,6 +17,9 @@ jobs:
       # Если не заданы — скрипты просто не шлют уведомления (workflow не падает).
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      # Бесплатный ключ Twelve Data для котировок (Макро + Удобрения v2).
+      # Если не задан — скрипты откатываются на keyless Stooq/Yahoo.
+      MARKETDATA_API_KEY: ${{ secrets.MARKETDATA_API_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
