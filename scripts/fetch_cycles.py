@@ -215,7 +215,9 @@ def main():
 
     for cfg in INDICATORS:
         try:
-            csv_text = marketdata._raw(FRED_CSV.format(id=cfg["id"]))
+            # Короткий таймаут без ретраев: если FRED недоступен с IP Actions,
+            # падаем быстро (иначе шаг висит и блокирует коммит остальных данных).
+            csv_text = marketdata._raw(FRED_CSV.format(id=cfg["id"]), timeout=12, retries=1)
         except Exception as e:
             errors[cfg["label"]] = str(e)[:80]
             print(f"  ✗ {cfg['label']}: {e}")
