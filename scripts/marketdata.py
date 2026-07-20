@@ -188,6 +188,36 @@ def daily(stooq_symbol):
     return None, last
 
 
+def _twelvedata_with_retry(stooq_symbols):
+    """Батч Twelve Data с ожиданием окна при 429 (free tier: 8 кредитов/мин).
+
+    Символы в батче тратятся как кредиты, поэтому 2-й скрипт в ту же минуту
+    ловит 429 — ждём ~минуту и повторяем один раз.
+    """
+    err = {s: (None, "td: нет ответа") for s in stooq_symbols}
+    for attempt in range(2):
+        rate = False
+        try:
+            td = from_twelvedata_batch(stooq_symbols)
+        except urllib.error.HTTPError as e:
+            err = {s: (None, f"td: {e}") for s in stooq_symbols}
+            rate = (e.code == 429)
+        except Exception as e:
+            return {s: (None, f"td: {e}") for s in stooq_symbols}
+        else:
+            err = td
+            allfail = all(v[0] is None for v in td.values())
+            rate = allfail and any(
+                any(k in (v[1] or "").lower() for k in ("429", "limit", "credit"))
+                for v in td.values())
+        if rate and attempt == 0:
+            print("  [td] лимит 8/мин — жду окно 62с и повторяю…")
+            time.sleep(62)
+            continue
+        return err
+    return err
+
+
 def daily_batch(stooq_symbols):
     """Грузит все символы. Twelve Data (если есть ключ) → фолбэк Stooq/Yahoo.
 
@@ -195,10 +225,7 @@ def daily_batch(stooq_symbols):
     """
     out = {}
     if TWELVE_KEY:
-        try:
-            td = from_twelvedata_batch(stooq_symbols)
-        except Exception as e:
-            td = {s: (None, f"td: {e}") for s in stooq_symbols}
+        td = _twelvedata_with_retry(stooq_symbols)
         for s in stooq_symbols:
             data, reason = td.get(s, (None, "td: нет ответа"))
             if data:
