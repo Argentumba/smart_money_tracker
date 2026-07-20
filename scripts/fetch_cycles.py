@@ -22,6 +22,7 @@
 Только стандартная библиотека.
 """
 
+import os
 import json
 from datetime import date, datetime, timezone
 
@@ -36,8 +37,14 @@ FRED_CSV = "https://fred.stlouisfed.org/graph/fredgraph.csv?id={id}"
 DBNOMICS_CANDIDATES = [
     "https://api.db.nomics.world/v22/series/FRED/{id}/{id}?observations=1",
     "https://api.db.nomics.world/v22/series?series_ids=FRED/{id}/{id}&observations=1",
-    "https://api.db.nomics.world/v22/series?observations=1&provider_code=FRED&series_code={id}",
 ]
+
+# Официальный FRED API — отдельный хост api.stlouisfed.org (не заблокированный
+# graph-хост fred.stlouisfed.org), надёжно работает с CI/облачных IP. Ключ
+# бесплатный и мгновенный: https://fredaccount.stlouisfed.org/apikeys
+FRED_KEY = os.environ.get("FRED_API_KEY", "").strip()
+FRED_API = ("https://api.stlouisfed.org/fred/series/observations"
+            "?series_id={id}&api_key={key}&file_type=json&sort_order=asc")
 
 # id FRED, человекочитаемый label, цикл, единица.
 INDICATORS = [
@@ -130,12 +137,37 @@ def _parse_dbnomics(txt):
     return out
 
 
+def _parse_fred_api(txt):
+    obs = (json.loads(txt).get("observations")) or []
+    out = []
+    for o in obs:
+        v = o.get("value")
+        if v in (None, ".", ""):
+            continue
+        try:
+            out.append((o["date"], float(v)))
+        except (ValueError, KeyError, TypeError):
+            continue
+    return out
+
+
 def fetch_series(fred_id):
-    """Ряд FRED-серии: DBnomics (несколько форматов URL) → FRED CSV (фолбэк).
+    """Ряд FRED-серии: FRED API (по ключу) → DBnomics → FRED CSV.
 
     Возвращает (series [(date,float)] старые→новые, source|reason)."""
     import urllib.error
     db_err = "dbnomics: нет"
+
+    # 1) Официальный FRED API (если задан ключ) — самый надёжный путь.
+    if FRED_KEY:
+        try:
+            txt = marketdata._raw(FRED_API.format(id=fred_id, key=FRED_KEY), timeout=15, retries=1)
+            s = _parse_fred_api(txt)
+            if len(s) >= 2:
+                return s, "fred-api"
+            db_err = "fred-api: пустой ряд"
+        except Exception as e:
+            db_err = f"fred-api: {str(e)[:50]}"
     for tmpl in DBNOMICS_CANDIDATES:
         try:
             txt = marketdata._raw(tmpl.format(id=fred_id), timeout=15, retries=1)
