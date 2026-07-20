@@ -58,9 +58,8 @@ def pct(cur, ref):
     return round((cur - ref) / ref * 100, 2)
 
 
-def fetch_indicator(cfg):
-    """Возвращает (dict индикатора | None, source|reason)."""
-    data, info = marketdata.daily(cfg["symbol"])
+def make_indicator(cfg, data, info):
+    """Строит dict индикатора из уже загруженных данных. → (dict|None, source|reason)."""
     if not data:
         print(f"  ✗ {cfg['label']}: {info}")
         return None, info
@@ -100,9 +99,12 @@ def main():
     indicators = []
     alerts = []
     errors = {}
-    print("→ Сбор макро-индикаторов (Stooq → Yahoo фолбэк)")
+    src = "Twelve Data" if marketdata.TWELVE_KEY else "Stooq/Yahoo (keyless)"
+    print(f"→ Сбор макро-индикаторов ({src})")
+    batch = marketdata.daily_batch([cfg["symbol"] for cfg in INDICATORS])
     for cfg in INDICATORS:
-        ind, info = fetch_indicator(cfg)
+        data, info = batch.get(cfg["symbol"], (None, "нет ответа"))
+        ind, info = make_indicator(cfg, data, info)
         if ind:
             indicators.append(ind)
             if ind["alert"]:

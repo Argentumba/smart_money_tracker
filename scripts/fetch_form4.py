@@ -293,11 +293,69 @@ def build_message(ticker, parsed, agg, url=None):
     return "\n\n".join(lines)
 
 
+CLUSTER_WINDOW_DAYS = 30   # окно, в котором инсайдеры считаются «кластером»
+
+
+def _direction(rec):
+    codes = {t["code"] for t in rec.get("trades", [])}
+    if "P" in codes:
+        return "buy"
+    if "S" in codes:
+        return "sell"
+    return None
+
+
+def compute_clusters(txns):
+    """Кластеры инсайдеров: ≥2 РАЗНЫХ инсайдера в одну сторону по одной бумаге
+    за окно. Кластерные покупки/продажи — куда более сильный сигнал, чем одиночные.
+    """
+    from datetime import date as _date
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=CLUSTER_WINDOW_DAYS)).strftime("%Y-%m-%d")
+    groups = {}
+    for r in txns:
+        if r.get("filing_date", "") < cutoff:
+            continue
+        d = _direction(r)
+        if not d:
+            continue
+        key = (r["ticker"], d)
+        g = groups.setdefault(key, {"insiders": {}, "value": 0.0, "dates": []})
+        val = sum(t.get("value", 0) for t in r.get("trades", []))
+        g["insiders"][r["insider"]] = g["insiders"].get(r["insider"], 0) + val
+        g["value"] += val
+        g["dates"].append(r.get("filing_date", ""))
+    out = []
+    for (ticker, direction), g in groups.items():
+        names = list(g["insiders"].keys())
+        if len(names) >= 2:
+            out.append({
+                "ticker": ticker, "direction": direction,
+                "count": len(names), "insiders": names,
+                "total_value": round(g["value"]),
+                "last_date": max(g["dates"]) if g["dates"] else "",
+            })
+    out.sort(key=lambda c: (c["count"], c["total_value"]), reverse=True)
+    return out
+
+
+def build_cluster_alert(c):
+    e = notify.esc
+    buy = c["direction"] == "buy"
+    head = "🟢🟢 <b>КЛАСТЕР ПОКУПОК ИНСАЙДЕРОВ</b>" if buy else "🔴🔴 <b>КЛАСТЕР ПРОДАЖ ИНСАЙДЕРОВ</b>"
+    strong = " · <b>сильный сигнал</b>" if c["count"] >= 3 else ""
+    return (f"{head} · ${e(c['ticker'])}{strong}\n"
+            f"{c['count']} разных инсайдера за {CLUSTER_WINDOW_DAYS} дней: "
+            f"{e(', '.join(c['insiders']))}\n"
+            f"Суммарно ≈ <b>{fmt_usd(c['total_value'])}</b>\n"
+            f"<i>Несколько инсайдеров в одну сторону — сильнее одиночной сделки. Не рекомендация.</i>")
+
+
 def main():
     prev = load_state()
     seeding = prev is None
     seen = set(prev.get("seen_accessions", [])) if prev else set()
     kept_txns = prev.get("transactions", []) if prev else []
+    seen_clusters = set(prev.get("seen_clusters", [])) if prev else set()
 
     if seeding:
         print("→ Первый запуск: посев без алертов (запоминаем текущие Form 4).")
@@ -360,11 +418,26 @@ def main():
 
     # Обновляем состояние
     all_txns = (fresh_txns + kept_txns)[:KEEP_TXNS]
+
+    # Кластеры инсайдеров (несколько топов в одну сторону по одной бумаге).
+    clusters = compute_clusters(all_txns)
+    cluster_alerts = 0
+    new_seen_clusters = set(seen_clusters)
+    for c in clusters:
+        sig = f"{c['ticker']}|{c['direction']}|{c['count']}"
+        new_seen_clusters.add(sig)
+        # алертим новый/подросший кластер (сигнатура включает count)
+        if not seeding and sig not in seen_clusters:
+            if notify.send(build_cluster_alert(c)):
+                cluster_alerts += 1
+
     state = {
         "generated": datetime.now(timezone.utc).isoformat(),
         "portfolio": MY_PORTFOLIO,
         "alert_codes": sorted(ALERT_CODES),
         "seen_accessions": list(new_seen)[:KEEP_SEEN],
+        "seen_clusters": list(new_seen_clusters)[:KEEP_SEEN],
+        "clusters": clusters,
         "transactions": all_txns,
     }
     STATE_FILE.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -372,7 +445,8 @@ def main():
     if seeding:
         print(f"✓ Посев завершён: {len(fresh_txns)} подач помечены как виденные, алертов не слали.")
     else:
-        print(f"✓ Новых подач с сигналом: {len(fresh_txns)}, отправлено в Telegram: {alerts_sent}")
+        print(f"✓ Новых подач: {len(fresh_txns)}, одиночных алертов: {alerts_sent}, "
+              f"кластерных: {cluster_alerts} (всего кластеров: {len(clusters)})")
 
 
 if __name__ == "__main__":
