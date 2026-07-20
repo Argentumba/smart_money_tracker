@@ -79,6 +79,7 @@
     <div class="tab" data-view="funds">🏦 Движения фондов</div>
     <div class="tab" data-view="insiders">🕵️ Инсайдеры (Form 4)</div>
     <div class="tab" data-view="macro">📈 Макро</div>
+    <div class="tab" data-view="fert">🌱 Удобрения v2</div>
   </div>
 
   <div class="view active" id="overlap"><div class="loading">Загрузка…</div></div>
@@ -86,6 +87,7 @@
   <div class="view" id="funds"><div class="loading">Загрузка…</div></div>
   <div class="view" id="insiders"><div class="loading">Загрузка…</div></div>
   <div class="view" id="macro"><div class="loading">Загрузка…</div></div>
+  <div class="view" id="fert"><div class="loading">Загрузка…</div></div>
 
   <footer>
     Источник: SEC EDGAR (data.sec.gov) · Обновление: GitHub Actions, ежедневно · Хостинг: GitHub Pages<br>
@@ -339,6 +341,51 @@ function renderMacro(m){
   el.innerHTML=html;
 }
 
+function renderFertilizers(d){
+  const el=document.getElementById('fert');
+  const prod=(d&&d.producers)||{};
+  const keys=Object.keys(prod);
+  if(!keys.length){
+    el.innerHTML='<div class="lbl">Удобрения · циклы и сжатие пружины</div>'+
+      '<div class="signal"><div class="signal-body" style="color:var(--muted)">'+
+      'Данные появятся после первого запуска анализа (Stooq на GitHub Actions).</div></div>';
+    return;
+  }
+  const phaseCol={'Экспансия':'green','Восстановление':'blue','Пик / замедление':'amber','Спад':'red'};
+  const springCol=s=> s.indexOf('↑')>=0?'green' : s.indexOf('↓')>=0?'red' : s==='взведена'?'amber':'muted';
+  const s=d.summary||{};
+  const phTxt=Object.entries(s.phases||{}).map(([k,v])=>`${k}: ${v}`).join(' · ');
+  let html=`<div class="lbl">Удобрения · циклы и «сжатие пружины» (метод компрессии волатильности)</div>`;
+  html+=`<div class="warn" style="margin:0 0 16px"><b>СВОДКА ПО СЕКТОРУ</b>`+
+        `Фазы цикла — ${phTxt||'—'}. Пружина взведена у ${s.squeezed||0} из ${s.total||keys.length}. `+
+        `Это техническая карта напряжения, не прогноз.</div>`;
+  keys.forEach(tk=>{
+    const r=prod[tk], cyc=r.cycle, sp=r.spring;
+    const pc=phaseCol[cyc.phase]||'dim';
+    const sc=springCol(sp.status);
+    const pos=cyc.pct_52w!=null?cyc.pct_52w:0;
+    const mom=cyc.mom_120!=null?((cyc.mom_120>0?'+':'')+cyc.mom_120+'%'):'—';
+    const momCol=(cyc.mom_120||0)>0?'green':(cyc.mom_120<0?'red':'dim');
+    html+=`<div class="fund-block">
+      <div class="signal-head" style="margin-bottom:12px">
+        <span class="fund-name">$${esc(tk)}</span>
+        <span style="color:var(--dim);font-size:12px">${esc(r.name||'')}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:13px;margin-left:auto">${r.price} $</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        <span class="signal-tag" style="background:rgba(0,0,0,.2);color:var(--${pc})">ЦИКЛ: ${esc(cyc.phase)}</span>
+        <span class="signal-tag" style="background:rgba(0,0,0,.2);color:var(--${sc})">🧨 ПРУЖИНА: ${esc(sp.status)}${sp.coil_dir&&sp.coil_dir!=='—'&&sp.status==='взведена'?' ('+esc(sp.coil_dir)+')':''}</span>
+        <span class="signal-tag" style="background:rgba(0,0,0,.2);color:var(--${momCol})">Импульс 120д: ${mom}</span>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:4px">
+        Положение в 52-нед. диапазоне: ${cyc.pct_52w!=null?cyc.pct_52w+'%':'—'} · над 200MA: ${cyc.above_200?'да':'нет'} · сжатие BBW: ${sp.bbw_pctile!=null?sp.bbw_pctile+'%':'—'} перцентиль</div>
+      <div style="height:6px;background:var(--panel2);border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:${pos}%;background:var(--${pc})"></div></div>
+    </div>`;
+  });
+  el.innerHTML=html;
+}
+
 async function load(){
   tabs();
   try{
@@ -359,6 +406,10 @@ async function load(){
     const r=await fetch('data/macro.json?'+Date.now());
     renderMacro(r.ok ? await r.json() : null);
   }catch(e){ renderMacro(null); }
+  try{
+    const r=await fetch('data/fertilizers.json?'+Date.now());
+    renderFertilizers(r.ok ? await r.json() : null);
+  }catch(e){ renderFertilizers(null); }
 }
 load();
 </script>
