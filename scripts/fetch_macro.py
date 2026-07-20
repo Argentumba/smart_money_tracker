@@ -20,7 +20,8 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
-from fetch_13f import get, OUT
+from fetch_13f import OUT
+import marketdata
 import notify
 
 # Отслеживаем ликвидные commodity-ETF (тикеры Stooq с суффиксом .us стабильны и
@@ -51,28 +52,6 @@ MANUAL_WATCH = [
      "url": "https://www.fao.org/worldfoodsituation/foodpricesindex/en/"},
 ]
 
-STOOQ_HIST = "https://stooq.com/q/d/l/?s={symbol}&i=d"
-
-
-def parse_closes(csv_text):
-    """Из CSV Stooq (Date,Open,High,Low,Close,Volume) → список (date, close), старые→новые."""
-    rows = []
-    lines = [ln for ln in csv_text.strip().splitlines() if ln]
-    if not lines or not lines[0].lower().startswith("date"):
-        return rows
-    for ln in lines[1:]:
-        parts = ln.split(",")
-        if len(parts) < 5:
-            continue
-        date = parts[0]
-        try:
-            close = float(parts[4])
-        except ValueError:
-            continue
-        rows.append((date, close))
-    return rows
-
-
 def pct(cur, ref):
     if ref in (None, 0):
         return None
@@ -80,26 +59,25 @@ def pct(cur, ref):
 
 
 def fetch_indicator(cfg):
-    """Возвращает dict индикатора или None при недоступности источника."""
-    try:
-        csv_text = get(STOOQ_HIST.format(symbol=cfg["symbol"]))
-    except Exception as e:
-        print(f"  ✗ {cfg['label']}: источник недоступен ({e})")
-        return None
-    closes = parse_closes(csv_text)
+    """Возвращает (dict индикатора | None, source|reason)."""
+    data, info = marketdata.daily(cfg["symbol"])
+    if not data:
+        print(f"  ✗ {cfg['label']}: {info}")
+        return None, info
+    closes = data["close"]
+    dates = data["date"]
     if len(closes) < 2:
-        print(f"  ✗ {cfg['label']}: мало данных")
-        return None
-    date, price = closes[-1]
-    prev = closes[-2][1]
-    week = closes[-6][1] if len(closes) >= 6 else None
+        return None, "мало данных"
+    price = round(closes[-1], 2)
+    prev = closes[-2]
+    week = closes[-6] if len(closes) >= 6 else None
     c1 = pct(price, prev)
     c5 = pct(price, week)
     alert = c1 is not None and abs(c1) >= cfg["alert"]
-    print(f"  ✓ {cfg['label']}: {price} ({'+' if (c1 or 0) > 0 else ''}{c1}% день)")
+    print(f"  ✓ {cfg['label']}: {price} ({'+' if (c1 or 0) > 0 else ''}{c1}% день) [{info}]")
     return {"key": cfg["key"], "label": cfg["label"], "unit": cfg["unit"],
             "price": price, "change_1d": c1, "change_5d": c5,
-            "date": date, "alert": bool(alert)}
+            "date": dates[-1], "alert": bool(alert), "source": info}, info
 
 
 def implication(ind):
@@ -121,18 +99,22 @@ def implication(ind):
 def main():
     indicators = []
     alerts = []
-    print("→ Сбор макро-индикаторов (Stooq)")
+    errors = {}
+    print("→ Сбор макро-индикаторов (Stooq → Yahoo фолбэк)")
     for cfg in INDICATORS:
-        ind = fetch_indicator(cfg)
+        ind, info = fetch_indicator(cfg)
         if ind:
             indicators.append(ind)
             if ind["alert"]:
                 alerts.append(ind)
+        else:
+            errors[cfg["label"]] = info
 
     out = {
         "generated": datetime.now(timezone.utc).isoformat(),
         "indicators": indicators,
         "manual_watch": MANUAL_WATCH,
+        "errors": errors,
     }
     # Если вообще ничего не собралось (источник заблокирован) — не затираем
     # возможный прежний файл пустышкой.
