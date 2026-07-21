@@ -1,23 +1,23 @@
 {
-  "generated": "2026-07-20T15:10:38.039187+00:00",
+  "generated": "2026-07-21T12:21:53.738483+00:00",
   "producers": {
     "CF": {
-      "price": 124.26,
+      "price": 123.57,
       "date": "2026-07-20",
       "cycle": {
         "phase": "Экспансия",
-        "pct_52w": 78,
+        "pct_52w": 77,
         "above_200": true,
-        "mom_120": 35.6,
-        "atr_pct": 3.4
+        "mom_120": 34.8,
+        "atr_pct": 3.5
       },
       "spring": {
-        "bbw_pctile": 81,
+        "bbw_pctile": 80,
         "squeeze": false,
         "fired": false,
         "status": "расслаблена",
         "coil_dir": "—",
-        "vol_ratio": 0.1,
+        "vol_ratio": 1.0,
         "vol_confirm": false
       },
       "name": "CF Industries (азот)",
@@ -26,7 +26,7 @@
       "accumulation": false
     },
     "NTR": {
-      "price": 66.65,
+      "price": 66.66,
       "date": "2026-07-20",
       "cycle": {
         "phase": "Пик / замедление",
@@ -41,7 +41,7 @@
         "fired": false,
         "status": "расслаблена",
         "coil_dir": "—",
-        "vol_ratio": 0.1,
+        "vol_ratio": 0.9,
         "vol_confirm": false
       },
       "name": "Nutrien (диверс.)",
@@ -50,22 +50,22 @@
       "accumulation": false
     },
     "MOS": {
-      "price": 22.02,
+      "price": 22.41,
       "date": "2026-07-20",
       "cycle": {
         "phase": "Спад",
-        "pct_52w": 13,
+        "pct_52w": 15,
         "above_200": false,
-        "mom_120": -22.3,
+        "mom_120": -20.9,
         "atr_pct": 3.8
       },
       "spring": {
-        "bbw_pctile": 10,
+        "bbw_pctile": 16,
         "squeeze": true,
         "fired": false,
         "status": "взведена",
         "coil_dir": "вниз",
-        "vol_ratio": 0.1,
+        "vol_ratio": 0.5,
         "vol_confirm": false
       },
       "name": "Mosaic (калий/фосфат)",
@@ -74,22 +74,22 @@
       "accumulation": false
     },
     "IPI": {
-      "price": 34.3,
+      "price": 33.96,
       "date": "2026-07-20",
       "cycle": {
         "phase": "Экспансия",
-        "pct_52w": 42,
+        "pct_52w": 40,
         "above_200": true,
-        "mom_120": 3.2,
-        "atr_pct": 3.7
+        "mom_120": 2.2,
+        "atr_pct": 3.8
       },
       "spring": {
-        "bbw_pctile": 1,
+        "bbw_pctile": 2,
         "squeeze": true,
         "fired": false,
         "status": "взведена",
-        "coil_dir": "нейтр.",
-        "vol_ratio": 0.0,
+        "coil_dir": "вниз",
+        "vol_ratio": 0.4,
         "vol_confirm": false
       },
       "name": "Intrepid Potash",
@@ -98,14 +98,14 @@
       "accumulation": false
     },
     "UAN": {
-      "price": 120.43,
+      "price": 120.46,
       "date": "2026-07-20",
       "cycle": {
         "phase": "Экспансия",
         "pct_52w": 65,
         "above_200": true,
         "mom_120": 18.1,
-        "atr_pct": 2.6
+        "atr_pct": 2.7
       },
       "spring": {
         "bbw_pctile": 22,
@@ -113,7 +113,7 @@
         "fired": true,
         "status": "разжалась ↑",
         "coil_dir": "вверх",
-        "vol_ratio": 0.0,
+        "vol_ratio": 0.6,
         "vol_confirm": false
       },
       "name": "CVR Partners (азот)",
@@ -122,22 +122,22 @@
       "accumulation": false
     },
     "SQM": {
-      "price": 67.94,
+      "price": 67.69,
       "date": "2026-07-20",
       "cycle": {
         "phase": "Спад",
         "pct_52w": 54,
         "above_200": false,
-        "mom_120": -19.1,
-        "atr_pct": 4.2
+        "mom_120": -19.4,
+        "atr_pct": 4.3
       },
       "spring": {
-        "bbw_pctile": 14,
+        "bbw_pctile": 15,
         "squeeze": true,
         "fired": false,
         "status": "взведена",
         "coil_dir": "нейтр.",
-        "vol_ratio": 0.0,
+        "vol_ratio": 1.0,
         "vol_confirm": false
       },
       "name": "SQM (калий/литий)",
@@ -146,13 +146,13 @@
       "accumulation": false
     },
     "ICL": {
-      "price": 5.01,
+      "price": 5.0,
       "date": "2026-07-20",
       "cycle": {
         "phase": "Спад",
-        "pct_52w": 10,
+        "pct_52w": 9,
         "above_200": false,
-        "mom_120": -7.0,
+        "mom_120": -7.2,
         "atr_pct": 2.1
       },
       "spring": {
@@ -161,7 +161,7 @@
         "fired": false,
         "status": "взведена",
         "coil_dir": "вниз",
-        "vol_ratio": 0.1,
+        "vol_ratio": 0.7,
         "vol_confirm": false
       },
       "name": "ICL Group",

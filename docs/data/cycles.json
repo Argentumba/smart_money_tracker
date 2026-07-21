@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-20T15:12:55.374563+00:00",
+  "generated": "2026-07-21T12:24:06.806479+00:00",
   "phase": null,
   "score": 0,
   "curve_inverted": false,
@@ -14,15 +14,15 @@
   "note": "",
   "kondratieff_note": "Оценочно: переход в повышательную фазу 6-го К-цикла (ИИ + зелёная энергетика). Датировка К-циклов спорна.",
   "errors": {
-    "Кривая доходности 10Y−2Y": "dbnomics: 400 {\"_meta\":{\"args\":{\"observations\":[\"1\"],\"provider_code\":[\"FRED\"],\"series_code\":[\"T10Y2Y\"]},\"versi; fred: The read operation timed out",
-    "Кредитный спред HY (OAS)": "dbnomics: 400 {\"_meta\":{\"args\":{\"observations\":[\"1\"],\"provider_code\":[\"FRED\"],\"series_code\":[\"BAMLH0A0HYM2\"]},; fred: The read operation timed out",
-    "Загрузка мощностей": "dbnomics: 400 {\"_meta\":{\"args\":{\"observations\":[\"1\"],\"provider_code\":[\"FRED\"],\"series_code\":[\"TCU\"]},\"version\"; fred: The read operation timed out",
-    "Безработица": "dbnomics: 400 {\"_meta\":{\"args\":{\"observations\":[\"1\"],\"provider_code\":[\"FRED\"],\"series_code\":[\"UNRATE\"]},\"versi; fred: The read operation timed out",
-    "Пром. производство (г/г)": "dbnomics: 400 {\"_meta\":{\"args\":{\"observations\":[\"1\"],\"provider_code\":[\"FRED\"],\"series_code\":[\"INDPRO\"]},\"versi; fred: The read operation timed out",
-    "Запасы / продажи": "dbnomics: 400 {\"_meta\":{\"args\":{\"observations\":[\"1\"],\"provider_code\":[\"FRED\"],\"series_code\":[\"ISRATIO\"]},\"vers; fred: The read operation timed out",
-    "Заявки на пособие": "dbnomics: 400 {\"_meta\":{\"args\":{\"observations\":[\"1\"],\"provider_code\":[\"FRED\"],\"series_code\":[\"ICSA\"]},\"version; fred: The read operation timed out",
-    "Разрешения на строительство": "dbnomics: 400 {\"_meta\":{\"args\":{\"observations\":[\"1\"],\"provider_code\":[\"FRED\"],\"series_code\":[\"PERMIT\"]},\"versi; fred: The read operation timed out",
-    "Настроения потребителей": "dbnomics: 400 {\"_meta\":{\"args\":{\"observations\":[\"1\"],\"provider_code\":[\"FRED\"],\"series_code\":[\"UMCSENT\"]},\"vers; fred: The read operation timed out",
-    "Реальная ставка 10Y (TIPS)": "dbnomics: 400 {\"_meta\":{\"args\":{\"observations\":[\"1\"],\"provider_code\":[\"FRED\"],\"series_code\":[\"DFII10\"]},\"versi; fred: The read operation timed out"
+    "Кривая доходности 10Y−2Y": "dbnomics: пустой ряд; fred: The read operation timed out",
+    "Кредитный спред HY (OAS)": "dbnomics: пустой ряд; fred: The read operation timed out",
+    "Загрузка мощностей": "dbnomics: пустой ряд; fred: The read operation timed out",
+    "Безработица": "dbnomics: пустой ряд; fred: The read operation timed out",
+    "Пром. производство (г/г)": "dbnomics: пустой ряд; fred: The read operation timed out",
+    "Запасы / продажи": "dbnomics: пустой ряд; fred: The read operation timed out",
+    "Заявки на пособие": "dbnomics: пустой ряд; fred: The read operation timed out",
+    "Разрешения на строительство": "dbnomics: пустой ряд; fred: The read operation timed out",
+    "Настроения потребителей": "dbnomics: пустой ряд; fred: The read operation timed out",
+    "Реальная ставка 10Y (TIPS)": "dbnomics: пустой ряд; fred: The read operation timed out"
   }
 }
