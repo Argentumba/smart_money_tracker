@@ -152,11 +152,11 @@ def _td_parse(obj):
     return (out, None) if out["close"] else (None, "td: пустой ряд")
 
 
-def from_twelvedata_batch(stooq_symbols):
+def from_twelvedata_batch(stooq_symbols, outputsize=300):
     """Один батч-запрос к Twelve Data по всем символам. → {stooq_symbol: (data|None, reason)}."""
     tickers = [s.split(".")[0].upper() for s in stooq_symbols]
     url = (f"https://api.twelvedata.com/time_series?symbol={','.join(tickers)}"
-           f"&interval=1day&outputsize=300&apikey={TWELVE_KEY}")
+           f"&interval=1day&outputsize={outputsize}&apikey={TWELVE_KEY}")
     d = json.loads(_raw(url))
     res = {}
     if len(tickers) == 1:
@@ -188,7 +188,7 @@ def daily(stooq_symbol):
     return None, last
 
 
-def _twelvedata_with_retry(stooq_symbols):
+def _twelvedata_with_retry(stooq_symbols, outputsize=300):
     """Батч Twelve Data с ожиданием окна при 429 (free tier: 8 кредитов/мин).
 
     Символы в батче тратятся как кредиты, поэтому 2-й скрипт в ту же минуту
@@ -198,7 +198,7 @@ def _twelvedata_with_retry(stooq_symbols):
     for attempt in range(2):
         rate = False
         try:
-            td = from_twelvedata_batch(stooq_symbols)
+            td = from_twelvedata_batch(stooq_symbols, outputsize=outputsize)
         except urllib.error.HTTPError as e:
             err = {s: (None, f"td: {e}") for s in stooq_symbols}
             rate = (e.code == 429)
@@ -218,20 +218,21 @@ def _twelvedata_with_retry(stooq_symbols):
     return err
 
 
-def daily_batch(stooq_symbols):
+def daily_batch(stooq_symbols, outputsize=300):
     """Грузит все символы. Twelve Data (если есть ключ) → фолбэк Stooq/Yahoo.
 
+    outputsize — длина истории у Twelve Data (для бэктеста ставь большое, напр. 5000).
     Возвращает {stooq_symbol: (data|None, source|reason)}.
     """
     out = {}
     if TWELVE_KEY:
-        td = _twelvedata_with_retry(stooq_symbols)
+        td = _twelvedata_with_retry(stooq_symbols, outputsize=outputsize)
         for s in stooq_symbols:
             data, reason = td.get(s, (None, "td: нет ответа"))
             if data:
                 out[s] = (data, "twelvedata")
             else:
-                fb, src = daily(s)  # фолбэк на keyless
+                fb, src = daily(s)  # фолбэк на keyless (Stooq отдаёт всю историю)
                 out[s] = (fb, src) if fb else (None, f"{reason}; {src}")
         return out
     # без ключа — только keyless

@@ -84,6 +84,7 @@
     <div class="tab" data-view="insiders">🕵️ Инсайдеры (Form 4)</div>
     <div class="tab" data-view="macro">📈 Макро</div>
     <div class="tab" data-view="fert">🌱 Удобрения v2</div>
+    <div class="tab" data-view="backtest">🔬 Бэктест</div>
   </div>
 
   <div class="view active" id="signals"><div class="loading">Загрузка…</div></div>
@@ -94,6 +95,7 @@
   <div class="view" id="insiders"><div class="loading">Загрузка…</div></div>
   <div class="view" id="macro"><div class="loading">Загрузка…</div></div>
   <div class="view" id="fert"><div class="loading">Загрузка…</div></div>
+  <div class="view" id="backtest"><div class="loading">Загрузка…</div></div>
 
   <footer>
     Источник: SEC EDGAR (data.sec.gov) · Обновление: GitHub Actions, ежедневно · Хостинг: GitHub Pages<br>
@@ -483,6 +485,33 @@ function renderCycles(d){
   el.innerHTML=html;
 }
 
+function renderBacktest(d){
+  const el=document.getElementById('backtest');
+  if(!d||!d.results){
+    el.innerHTML='<div class="lbl">Бэктест сигналов</div><div class="signal"><div class="signal-body" style="color:var(--muted)">Появится после запуска бэктеста (backtest.py, отдельный еженедельный workflow).</div></div>';
+    return;
+  }
+  const H=d.horizons||[5,20,60];
+  const names={spring_up:'🧨 Пружина ↑ (пробой вверх)',spring_down:'🧨 Пружина ↓ (пробой вниз)',above_200ma:'📈 Цена выше 200MA (тренд)',below_200ma:'📉 Цена ниже 200MA'};
+  let html='<div class="lbl">Бэктест · реальная форвард-доходность сигналов vs базовая линия</div>';
+  html+=`<div class="warn" style="margin:0 0 16px"><b>КАК ЧИТАТЬ</b>edge = доходность сигнала минус безусловная (базовый случайный вход). Положительный edge = сигнал реально бьёт рынок. Универсум: ${esc((d.universe||[]).join(', '))}. Событий пружины: ↑${(d.events||{}).spring_up||0} / ↓${(d.events||{}).spring_down||0}.</div>`;
+  ['spring_up','spring_down','above_200ma','below_200ma'].forEach(sig=>{
+    const r=d.results[sig]; if(!r)return;
+    let rows='';
+    H.forEach(k=>{
+      const x=r[String(k)]||{};
+      if(!x.n){ rows+=`<div class="th-row"><span>${k} дней</span><span style="color:var(--muted)">нет событий</span></div>`; return; }
+      const edge=x.edge, ec=edge>0?'green':(edge<0?'red':'dim');
+      rows+=`<div class="th-row" style="flex-wrap:wrap;gap:8px">
+        <span style="min-width:70px"><b>${k} дней</b></span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;flex:1">ср. ${x.avg}% · <b style="color:var(--${ec})">edge ${edge>0?'+':''}${edge}%</b> · hit ${x.hit}% · база ${x.base_avg}% · n=${x.n}</span></div>`;
+    });
+    html+=`<div class="fund-block"><div class="fund-name" style="font-size:15px;margin-bottom:8px">${names[sig]||sig}</div>${rows}</div>`;
+  });
+  (d.notes||[]).forEach(n=>{ html+=`<div style="font-size:11px;color:var(--muted);margin-top:6px">· ${esc(n)}</div>`; });
+  el.innerHTML=html;
+}
+
 // СЛОЙ СИГНАЛОВ (удаляемый): читает data/signals.json (синтез из остальных).
 function renderSignals(d){
   const el=document.getElementById('signals');
@@ -552,6 +581,10 @@ async function load(){
     const r=await fetch('data/signals.json?'+Date.now());
     renderSignals(r.ok ? await r.json() : null);
   }catch(e){ renderSignals(null); }
+  try{
+    const r=await fetch('data/backtest.json?'+Date.now());
+    renderBacktest(r.ok ? await r.json() : null);
+  }catch(e){ renderBacktest(null); }
 }
 load();
 </script>
