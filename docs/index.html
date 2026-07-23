@@ -502,9 +502,10 @@ function renderBacktest(d){
       const x=r[String(k)]||{};
       if(!x.n){ rows+=`<div class="th-row"><span>${k} дней</span><span style="color:var(--muted)">нет событий</span></div>`; return; }
       const edge=x.edge, ec=edge>0?'green':(edge<0?'red':'dim');
+      const lc=x.low_confidence?' <span style="color:var(--amber)">⚠ малая выборка</span>':'';
       rows+=`<div class="th-row" style="flex-wrap:wrap;gap:8px">
         <span style="min-width:70px"><b>${k} дней</b></span>
-        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;flex:1">ср. ${x.avg}% · <b style="color:var(--${ec})">edge ${edge>0?'+':''}${edge}%</b> · hit ${x.hit}% · база ${x.base_avg}% · n=${x.n}</span></div>`;
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;flex:1">ср. ${x.avg}% · <b style="color:var(--${ec})">edge ${edge>0?'+':''}${edge}%</b> · hit ${x.hit}% · база ${x.base_avg}% · n=${x.n}${lc}</span></div>`;
     });
     html+=`<div class="fund-block"><div class="fund-name" style="font-size:15px;margin-bottom:8px">${names[sig]||sig}</div>${rows}</div>`;
   });
