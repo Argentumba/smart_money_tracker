@@ -21,8 +21,9 @@ jobs:
       # Если не задан — скрипты откатываются на keyless Stooq/Yahoo.
       MARKETDATA_API_KEY: ${{ secrets.MARKETDATA_API_KEY }}
       # Бесплатный ключ FRED API для вкладки «Циклы» (api.stlouisfed.org).
-      # Если не задан — пробуются keyless DBnomics/FRED CSV (часто недоступны с IP Actions).
-      FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+      # Секрет мог быть добавлен ранее под разным именем — пробуем цепочку
+      # распространённых вариантов (несуществующий секрет = пустая строка).
+      FRED_API_KEY: ${{ secrets.FRED_API_KEY || secrets.FRED_KEY || secrets.FRED_APIKEY || secrets.FRED_TOKEN || secrets.FRED || secrets.FREDAPIKEY || secrets.STLOUISFED_API_KEY || secrets.FRED_API || secrets.FRED_SECRET }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
