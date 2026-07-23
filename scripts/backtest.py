@@ -25,10 +25,16 @@
 """
 
 import json
+import time
 from datetime import datetime, timezone
 
 from fetch_13f import OUT
 import marketdata
+
+# Twelve Data free: 8 кредитов/мин, символ в батче = кредит. Грузим чанками
+# по ≤7 символов с паузой ~минуту, иначе 16 сразу → 429 → мусорный фолбэк.
+TD_CHUNK = 7
+TD_PAUSE = 62
 
 # Универсум для статистики (US-тикеры с историей). Больше имён → больше событий.
 UNIVERSE = ["CF", "NTR", "MOS", "IPI", "UAN", "SQM", "ICL",
@@ -103,9 +109,21 @@ def stats(rets):
             "hit": round(hit * 100, 1)}
 
 
+def fetch_universe(symbols, outputsize=5000):
+    """Грузим чанками ≤TD_CHUNK с паузой, чтобы не ловить лимит 8/мин."""
+    result = {}
+    for ci in range(0, len(symbols), TD_CHUNK):
+        grp = symbols[ci:ci + TD_CHUNK]
+        if ci > 0:
+            print(f"  … пауза {TD_PAUSE}с (лимит Twelve Data 8/мин)")
+            time.sleep(TD_PAUSE)
+        result.update(marketdata.daily_batch(grp, outputsize=outputsize))
+    return result
+
+
 def main():
     print("→ Бэктест сигналов (event study)")
-    batch = marketdata.daily_batch([f"{t.lower()}.us" for t in UNIVERSE], outputsize=5000)
+    batch = fetch_universe([f"{t.lower()}.us" for t in UNIVERSE], outputsize=5000)
 
     # накапливаем форвард-доходности сигналов и базы по всему универсуму
     acc = {"spring_up": {k: [] for k in HORIZONS},
@@ -115,10 +133,14 @@ def main():
     base = {k: [] for k in HORIZONS}
     used, ev_up, ev_down = [], 0, 0
 
+    need = BBW_HIST + BBW_N + max(HORIZONS) + 5
     for t in UNIVERSE:
-        data, _ = batch.get(f"{t.lower()}.us", (None, ""))
-        if not data or len(data["close"]) < BBW_HIST + BBW_N + max(HORIZONS) + 5:
+        data, src = batch.get(f"{t.lower()}.us", (None, "нет"))
+        nbars = len(data["close"]) if data else 0
+        if nbars < need:
+            print(f"  · {t}: пропуск ({nbars} баров, нужно {need}; источник {src})")
             continue
+        print(f"  ✓ {t}: {nbars} баров [{src}]")
         o, h, l, c = data["open"], data["high"], data["low"], data["close"]
         up, down = spring_signals(o, h, l, c)
         above, below = ma_regime(c)
@@ -140,6 +162,7 @@ def main():
             if s.get("n") and b.get("n"):
                 s["base_avg"] = b["avg"]
                 s["edge"] = round(s["avg"] - b["avg"], 2)   # чистый edge над базой
+                s["low_confidence"] = s["n"] < 30           # мало событий — не доверять
             results[sig][str(k)] = s
 
     out = {
