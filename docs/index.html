@@ -74,7 +74,10 @@
   </div>
 
   <div class="tabs">
-    <div class="tab active" data-view="overlap">⚡ Пересечения с портфелем</div>
+    <!-- СЛОЙ СИГНАЛОВ (удаляемый): чтобы убрать — удали этот таб, его view,
+         функцию renderSignals, её вызовы в load() и вернуть active на overlap. -->
+    <div class="tab active" data-view="signals">🎯 Сигналы</div>
+    <div class="tab" data-view="overlap">⚡ Пересечения с портфелем</div>
     <div class="tab" data-view="cycles">🌀 Циклы</div>
     <div class="tab" data-view="themes">🧭 Темы</div>
     <div class="tab" data-view="funds">🏦 Движения фондов</div>
@@ -83,7 +86,8 @@
     <div class="tab" data-view="fert">🌱 Удобрения v2</div>
   </div>
 
-  <div class="view active" id="overlap"><div class="loading">Загрузка…</div></div>
+  <div class="view active" id="signals"><div class="loading">Загрузка…</div></div>
+  <div class="view" id="overlap"><div class="loading">Загрузка…</div></div>
   <div class="view" id="cycles"><div class="loading">Загрузка…</div></div>
   <div class="view" id="themes"><div class="loading">Загрузка…</div></div>
   <div class="view" id="funds"><div class="loading">Загрузка…</div></div>
@@ -479,6 +483,42 @@ function renderCycles(d){
   el.innerHTML=html;
 }
 
+// СЛОЙ СИГНАЛОВ (удаляемый): читает data/signals.json (синтез из остальных).
+function renderSignals(d){
+  const el=document.getElementById('signals');
+  if(!d||!d.signals){
+    el.innerHTML='<div class="lbl">Сигналы</div><div class="signal"><div class="signal-body" style="color:var(--muted)">Появятся после первого запуска слоя сигналов (build_signals.py).</div></div>';
+    return;
+  }
+  const dcol={bull:'green',bear:'red',neutral:'amber'};
+  const dlabel={bull:'бычий',bear:'медвежий',neutral:'нейтр'};
+  const p=d.posture||{}, c=d.counts||{bull:0,bear:0,neutral:0};
+  const pc=dcol[p.direction]||'dim';
+  let html=`<div class="fund-block" style="border-left:4px solid var(--${pc})">
+    <div class="signal-head" style="margin-bottom:6px">
+      <span class="fund-name" style="color:var(--${pc})">Рыночная поза: ${esc(p.label||'—')}</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;margin-left:auto;color:var(--dim)">🟢 ${c.bull} · 🔴 ${c.bear} · ⚪ ${c.neutral}</span>
+    </div>
+    <div class="signal-body" style="color:var(--dim)">${esc(p.note||'')}</div>
+    ${(p.tilt&&p.tilt.length)?`<div style="margin-top:8px;font-size:12px">Крен по секторам: <b>${esc(p.tilt.join(', '))}</b></div>`:''}
+  </div>`;
+  html+='<div class="lbl">Сигналы · ранжированы по силе · синтез из всех вкладок</div>';
+  (d.signals||[]).forEach(s=>{
+    const col=dcol[s.direction]||'dim';
+    const cls=s.direction==='bull'?'match':(s.direction==='bear'?'conflict':'idea');
+    const meter=Math.max(6, Math.min(100, (s.score||0)/7.5*100));
+    html+=`<div class="signal ${cls}"><div class="signal-head">
+      <span class="signal-ticker">${esc(s.subject)}</span>
+      <span class="signal-tag" style="background:rgba(0,0,0,.2);color:var(--${col})">${esc(s.strength)} · ${esc(dlabel[s.direction]||s.direction)}</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-left:auto">${esc(s.source)}</span></div>
+      <div class="signal-body"><b>${esc(s.title)}</b><br>${esc(s.rationale)}
+      <div style="height:5px;background:var(--panel2);border-radius:3px;overflow:hidden;margin-top:8px"><div style="height:100%;width:${meter}%;background:var(--${col})"></div></div></div></div>`;
+  });
+  if(!(d.signals||[]).length) html+='<div class="signal"><div class="signal-body" style="color:var(--muted)">Активных сигналов сейчас нет — рынок тихий по отслеживаемым факторам.</div></div>';
+  html+='<div class="warn" style="margin-top:8px"><b>ОГОВОРКА</b>Сигналы — синтез независимых факторов («здесь совпало»), а не рекомендация к сделке.</div>';
+  el.innerHTML=html;
+}
+
 async function load(){
   tabs();
   try{
@@ -507,6 +547,11 @@ async function load(){
     const r=await fetch('data/cycles.json?'+Date.now());
     renderCycles(r.ok ? await r.json() : null);
   }catch(e){ renderCycles(null); }
+  // СЛОЙ СИГНАЛОВ (удаляемый)
+  try{
+    const r=await fetch('data/signals.json?'+Date.now());
+    renderSignals(r.ok ? await r.json() : null);
+  }catch(e){ renderSignals(null); }
 }
 load();
 </script>

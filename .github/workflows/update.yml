@@ -52,11 +52,17 @@ jobs:
         timeout-minutes: 4
         continue-on-error: true
 
+      # СЛОЙ СИГНАЛОВ (удаляемый): только читает готовые JSON, без сети.
+      # Убрать слой — удали этот шаг и signals.json из git add ниже.
+      - name: Build signals layer (synthesis, no network)
+        run: python3 scripts/build_signals.py
+        continue-on-error: true
+
       - name: Commit updated data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/data/funds.json docs/data/insiders.json docs/data/macro.json docs/data/fertilizers.json docs/data/cycles.json
+          git add docs/data/funds.json docs/data/insiders.json docs/data/macro.json docs/data/fertilizers.json docs/data/cycles.json docs/data/signals.json
           if git diff --staged --quiet; then
             echo "No changes — data unchanged."
           else
