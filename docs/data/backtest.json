@@ -1,7 +1,22 @@
 {
-  "generated": "2026-07-23T20:36:57.323508+00:00",
+  "generated": "2026-07-23T20:42:18.297188+00:00",
   "universe": [
-    "RIOT"
+    "CF",
+    "NTR",
+    "MOS",
+    "IPI",
+    "UAN",
+    "SQM",
+    "ICL",
+    "CLSK",
+    "HUT",
+    "RIOT",
+    "GNL",
+    "HAL",
+    "NEM",
+    "PSTL",
+    "SPY",
+    "QQQ"
   ],
   "horizons": [
     5,
@@ -9,87 +24,124 @@
     60
   ],
   "events": {
-    "spring_up": 3,
-    "spring_down": 4
+    "spring_up": 1606,
+    "spring_down": 1313
   },
   "results": {
     "spring_up": {
       "5": {
-        "n": 3,
-        "avg": -0.42,
-        "median": 2.12,
-        "hit": 66.7,
-        "base_avg": 1.59,
-        "edge": -2.01
+        "n": 1600,
+        "avg": 0.32,
+        "median": 0.15,
+        "hit": 52.1,
+        "base_avg": 0.4,
+        "edge": -0.08,
+        "low_confidence": false
       },
       "20": {
-        "n": 3,
-        "avg": 6.0,
-        "median": 2.28,
-        "hit": 66.7,
-        "base_avg": 8.1,
-        "edge": -2.1
+        "n": 1595,
+        "avg": 1.75,
+        "median": 0.63,
+        "hit": 53.0,
+        "base_avg": 1.59,
+        "edge": 0.16,
+        "low_confidence": false
       },
       "60": {
-        "n": 0
+        "n": 1588,
+        "avg": 4.1,
+        "median": 1.8,
+        "hit": 55.9,
+        "base_avg": 5.42,
+        "edge": -1.32,
+        "low_confidence": false
       }
     },
     "spring_down": {
       "5": {
-        "n": 4,
-        "avg": 3.94,
-        "median": 5.63,
-        "hit": 50.0,
-        "base_avg": 1.59,
-        "edge": 2.35
+        "n": 1313,
+        "avg": 0.76,
+        "median": 0.38,
+        "hit": 53.3,
+        "base_avg": 0.4,
+        "edge": 0.36,
+        "low_confidence": false
       },
       "20": {
-        "n": 2,
-        "avg": 41.44,
-        "median": 42.81,
-        "hit": 100.0,
-        "base_avg": 8.1,
-        "edge": 33.34
+        "n": 1307,
+        "avg": 1.51,
+        "median": 0.85,
+        "hit": 54.2,
+        "base_avg": 1.59,
+        "edge": -0.08,
+        "low_confidence": false
       },
       "60": {
-        "n": 2,
-        "avg": 124.44,
-        "median": 134.66,
-        "hit": 100.0,
-        "base_avg": 21.0,
-        "edge": 103.44
+        "n": 1296,
+        "avg": 6.33,
+        "median": 2.19,
+        "hit": 55.3,
+        "base_avg": 5.42,
+        "edge": 0.91,
+        "low_confidence": false
       }
     },
     "above_200ma": {
       "5": {
-        "n": 46,
-        "avg": -0.89,
-        "median": -0.97,
-        "hit": 43.5,
-        "base_avg": 1.59,
-        "edge": -2.48
+        "n": 31735,
+        "avg": 0.46,
+        "median": 0.25,
+        "hit": 52.7,
+        "base_avg": 0.4,
+        "edge": 0.06,
+        "low_confidence": false
       },
       "20": {
-        "n": 31,
-        "avg": -6.53,
-        "median": -12.3,
-        "hit": 38.7,
-        "base_avg": 8.1,
-        "edge": -14.63
+        "n": 31561,
+        "avg": 1.98,
+        "median": 0.9,
+        "hit": 54.9,
+        "base_avg": 1.59,
+        "edge": 0.39,
+        "low_confidence": false
       },
       "60": {
-        "n": 0
+        "n": 31000,
+        "avg": 6.83,
+        "median": 2.76,
+        "hit": 58.1,
+        "base_avg": 5.42,
+        "edge": 1.41,
+        "low_confidence": false
       }
     },
     "below_200ma": {
       "5": {
-        "n": 0
+        "n": 27309,
+        "avg": 0.3,
+        "median": 0.0,
+        "hit": 49.9,
+        "base_avg": 0.4,
+        "edge": -0.1,
+        "low_confidence": false
       },
       "20": {
-        "n": 0
+        "n": 27243,
+        "avg": 1.07,
+        "median": 0.23,
+        "hit": 50.8,
+        "base_avg": 1.59,
+        "edge": -0.52,
+        "low_confidence": false
       },
       "60": {
-        "n": 0
+        "n": 27164,
+        "avg": 3.9,
+        "median": -0.08,
+        "hit": 49.6,
+        "base_avg": 5.42,
+        "edge": -1.52,
+        "low_confidence": false
       }
     }
   },
