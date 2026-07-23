@@ -1,28 +1,122 @@
 {
-  "generated": "2026-07-23T12:23:28.669736+00:00",
-  "phase": null,
-  "score": 0,
+  "generated": "2026-07-23T15:36:03.937993+00:00",
+  "phase": "Экспансия",
+  "score": 4,
   "curve_inverted": false,
   "cycles": {
-    "Жюгляр": [],
-    "Китчин": [],
-    "Кондратьев": []
+    "Жюгляр": [
+      {
+        "id": "T10Y2Y",
+        "label": "Кривая доходности 10Y−2Y",
+        "unit": "п.п.",
+        "value": 0.36,
+        "signal": 1,
+        "note": "положительный наклон — здоровый режим",
+        "date": "2026-07-22"
+      },
+      {
+        "id": "BAMLH0A0HYM2",
+        "label": "Кредитный спред HY (OAS)",
+        "unit": "%",
+        "value": 2.68,
+        "signal": 1,
+        "note": "узкий спред — аппетит к риску",
+        "date": "2026-07-22"
+      },
+      {
+        "id": "TCU",
+        "label": "Загрузка мощностей",
+        "unit": "%",
+        "value": 76.09,
+        "signal": 0,
+        "note": "стабильно",
+        "date": "2026-06-01"
+      },
+      {
+        "id": "UNRATE",
+        "label": "Безработица",
+        "unit": "%",
+        "value": 4.2,
+        "signal": 0,
+        "note": "без изменений",
+        "date": "2026-06-01"
+      },
+      {
+        "id": "INDPRO",
+        "label": "Пром. производство (г/г)",
+        "unit": "idx",
+        "value": 102.64,
+        "signal": 1,
+        "note": "+1.1% г/г",
+        "date": "2026-06-01"
+      }
+    ],
+    "Китчин": [
+      {
+        "id": "ISRATIO",
+        "label": "Запасы / продажи",
+        "unit": "x",
+        "value": 1.28,
+        "signal": 1,
+        "note": "запасы снижаются — впереди пополнение (плюс циклам)",
+        "date": "2026-05-01"
+      },
+      {
+        "id": "ICSA",
+        "label": "Заявки на пособие",
+        "unit": "тыс",
+        "value": 187000.0,
+        "signal": 1,
+        "note": "заявки снижаются — рынок труда крепнет",
+        "date": "2026-07-18"
+      },
+      {
+        "id": "PERMIT",
+        "label": "Разрешения на строительство",
+        "unit": "тыс",
+        "value": 1367.0,
+        "signal": 0,
+        "note": "стабильно",
+        "date": "2026-06-01"
+      },
+      {
+        "id": "UMCSENT",
+        "label": "Настроения потребителей",
+        "unit": "idx",
+        "value": 44.8,
+        "signal": -1,
+        "note": "настроения ухудшаются",
+        "date": "2026-05-01"
+      }
+    ],
+    "Кондратьев": [
+      {
+        "id": "DFII10",
+        "label": "Реальная ставка 10Y (TIPS)",
+        "unit": "%",
+        "value": 2.37,
+        "signal": 0,
+        "note": "реальная ставка растёт — фон стоимости капитала",
+        "date": "2026-07-21"
+      }
+    ]
   },
-  "allocation": {},
-  "lead": [],
-  "lag": [],
-  "note": "",
+  "allocation": {
+    "Циклические": 30,
+    "Технологии": 40,
+    "Сырьё": 20,
+    "Защитные": 10
+  },
+  "lead": [
+    "Технологии",
+    "Дискреционные товары",
+    "Здравоохранение"
+  ],
+  "lag": [
+    "Энергетика",
+    "Коммунальные услуги"
+  ],
+  "note": "Рост прибылей и мощностей; следи за перегревом и инверсией кривой.",
   "kondratieff_note": "Оценочно: переход в повышательную фазу 6-го К-цикла (ИИ + зелёная энергетика). Датировка К-циклов спорна.",
-  "errors": {
-    "Кривая доходности 10Y−2Y": "dbnomics: пустой ряд; fred: The read operation timed out",
-    "Кредитный спред HY (OAS)": "dbnomics: пустой ряд; fred: The read operation timed out",
-    "Загрузка мощностей": "dbnomics: пустой ряд; fred: The read operation timed out",
-    "Безработица": "dbnomics: пустой ряд; fred: The read operation timed out",
-    "Пром. производство (г/г)": "dbnomics: пустой ряд; fred: The read operation timed out",
-    "Запасы / продажи": "dbnomics: пустой ряд; fred: The read operation timed out",
-    "Заявки на пособие": "dbnomics: пустой ряд; fred: The read operation timed out",
-    "Разрешения на строительство": "dbnomics: пустой ряд; fred: The read operation timed out",
-    "Настроения потребителей": "dbnomics: пустой ряд; fred: The read operation timed out",
-    "Реальная ставка 10Y (TIPS)": "dbnomics: пустой ряд; fred: The read operation timed out"
-  }
+  "errors": {}
 }

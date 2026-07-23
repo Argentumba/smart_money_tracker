@@ -1,23 +1,23 @@
 {
-  "generated": "2026-07-23T12:21:14.996643+00:00",
+  "generated": "2026-07-23T15:35:57.382273+00:00",
   "producers": {
     "CF": {
-      "price": 127.35,
-      "date": "2026-07-22",
+      "price": 127.89,
+      "date": "2026-07-23",
       "cycle": {
         "phase": "Экспансия",
-        "pct_52w": 83,
+        "pct_52w": 84,
         "above_200": true,
-        "mom_120": 36.7,
-        "atr_pct": 3.4
+        "mom_120": 36.0,
+        "atr_pct": 3.3
       },
       "spring": {
-        "bbw_pctile": 82,
+        "bbw_pctile": 79,
         "squeeze": false,
         "fired": false,
         "status": "расслаблена",
         "coil_dir": "—",
-        "vol_ratio": 0.7,
+        "vol_ratio": 0.0,
         "vol_confirm": false
       },
       "name": "CF Industries (азот)",
@@ -26,22 +26,22 @@
       "accumulation": false
     },
     "NTR": {
-      "price": 68.5,
-      "date": "2026-07-22",
+      "price": 68.75,
+      "date": "2026-07-23",
       "cycle": {
         "phase": "Пик / замедление",
-        "pct_52w": 49,
+        "pct_52w": 50,
         "above_200": true,
-        "mom_120": -4.3,
-        "atr_pct": 2.5
+        "mom_120": -3.3,
+        "atr_pct": 2.4
       },
       "spring": {
-        "bbw_pctile": 79,
+        "bbw_pctile": 76,
         "squeeze": false,
         "fired": false,
         "status": "расслаблена",
         "coil_dir": "—",
-        "vol_ratio": 0.5,
+        "vol_ratio": 0.1,
         "vol_confirm": false
       },
       "name": "Nutrien (диверс.)",
@@ -50,22 +50,22 @@
       "accumulation": false
     },
     "MOS": {
-      "price": 22.78,
-      "date": "2026-07-22",
+      "price": 22.55,
+      "date": "2026-07-23",
       "cycle": {
         "phase": "Спад",
-        "pct_52w": 17,
+        "pct_52w": 16,
         "above_200": false,
-        "mom_120": -19.0,
-        "atr_pct": 3.6
+        "mom_120": -19.6,
+        "atr_pct": 3.7
       },
       "spring": {
-        "bbw_pctile": 22,
-        "squeeze": false,
+        "bbw_pctile": 18,
+        "squeeze": true,
         "fired": false,
-        "status": "расслаблена",
-        "coil_dir": "—",
-        "vol_ratio": 0.9,
+        "status": "взведена",
+        "coil_dir": "вниз",
+        "vol_ratio": 0.2,
         "vol_confirm": false
       },
       "name": "Mosaic (калий/фосфат)",
@@ -74,13 +74,13 @@
       "accumulation": false
     },
     "IPI": {
-      "price": 34.82,
-      "date": "2026-07-22",
+      "price": 34.58,
+      "date": "2026-07-23",
       "cycle": {
         "phase": "Экспансия",
-        "pct_52w": 44,
+        "pct_52w": 43,
         "above_200": true,
-        "mom_120": 4.3,
+        "mom_120": 2.7,
         "atr_pct": 3.6
       },
       "spring": {
@@ -89,7 +89,7 @@
         "fired": false,
         "status": "взведена",
         "coil_dir": "нейтр.",
-        "vol_ratio": 0.5,
+        "vol_ratio": 0.0,
         "vol_confirm": false
       },
       "name": "Intrepid Potash",
@@ -99,21 +99,21 @@
     },
     "UAN": {
       "price": 122.86,
-      "date": "2026-07-22",
+      "date": "2026-07-23",
       "cycle": {
         "phase": "Экспансия",
         "pct_52w": 70,
         "above_200": true,
-        "mom_120": 15.4,
-        "atr_pct": 2.6
+        "mom_120": 16.7,
+        "atr_pct": 2.3
       },
       "spring": {
-        "bbw_pctile": 31,
+        "bbw_pctile": 28,
         "squeeze": false,
-        "fired": true,
-        "status": "разжалась ↑",
-        "coil_dir": "вверх",
-        "vol_ratio": 0.6,
+        "fired": false,
+        "status": "расслаблена",
+        "coil_dir": "—",
+        "vol_ratio": 0.0,
         "vol_confirm": false
       },
       "name": "CVR Partners (азот)",
@@ -122,22 +122,22 @@
       "accumulation": false
     },
     "SQM": {
-      "price": 69.21,
-      "date": "2026-07-22",
+      "price": 69.81,
+      "date": "2026-07-23",
       "cycle": {
         "phase": "Спад",
-        "pct_52w": 56,
+        "pct_52w": 57,
         "above_200": false,
-        "mom_120": -17.2,
-        "atr_pct": 4.0
+        "mom_120": -14.5,
+        "atr_pct": 3.7
       },
       "spring": {
-        "bbw_pctile": 7,
+        "bbw_pctile": 6,
         "squeeze": true,
         "fired": false,
         "status": "взведена",
         "coil_dir": "нейтр.",
-        "vol_ratio": 0.8,
+        "vol_ratio": 0.1,
         "vol_confirm": false
       },
       "name": "SQM (калий/литий)",
@@ -146,22 +146,22 @@
       "accumulation": false
     },
     "ICL": {
-      "price": 5.32,
-      "date": "2026-07-22",
+      "price": 5.29,
+      "date": "2026-07-23",
       "cycle": {
         "phase": "Спад",
-        "pct_52w": 23,
+        "pct_52w": 22,
         "above_200": false,
-        "mom_120": -2.7,
+        "mom_120": -3.4,
         "atr_pct": 2.3
       },
       "spring": {
-        "bbw_pctile": 21,
+        "bbw_pctile": 31,
         "squeeze": false,
-        "fired": true,
-        "status": "разжалась ↑",
-        "coil_dir": "вверх",
-        "vol_ratio": 0.5,
+        "fired": false,
+        "status": "расслаблена",
+        "coil_dir": "—",
+        "vol_ratio": 0.1,
         "vol_confirm": false
       },
       "name": "ICL Group",
@@ -176,7 +176,7 @@
       "Пик / замедление": 1,
       "Спад": 3
     },
-    "squeezed": 2,
+    "squeezed": 3,
     "total": 7,
     "confluence": []
   }
