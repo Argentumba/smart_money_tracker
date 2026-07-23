@@ -61,7 +61,19 @@ def _sig(cat, subject, direction, base, title, rationale, source, mult=1.0):
             "title": title, "rationale": rationale, "source": source}
 
 
-def from_fertilizers(d, out):
+def _spring_edge(bt, direction):
+    """Историч. edge пружины из backtest.json (горизонт 20д) для подписи сигнала."""
+    if not bt:
+        return ""
+    key = "spring_up" if direction == "bull" else "spring_down"
+    row = ((bt.get("results") or {}).get(key) or {}).get("20") or {}
+    if not row.get("n"):
+        return ""
+    return (f" Историч. edge за 20д: {row['edge']:+}% "
+            f"(hit {row['hit']}%, n={row['n']}).")
+
+
+def from_fertilizers(d, out, bt=None):
     for tk, r in (d.get("producers") or {}).items():
         sp = r.get("spring", {})
         name = r.get("name", tk)
@@ -76,10 +88,12 @@ def from_fertilizers(d, out):
         elif sp.get("fired"):
             up = sp.get("coil_dir") == "вверх"
             vol = f", объём ×{sp.get('vol_ratio')}" if sp.get("vol_confirm") else ""
+            edge = _spring_edge(bt, "bull" if up else "bear")
             out.append(_sig("spring_fired", f"${tk}", "bull" if up else "bear",
                             WEIGHTS["spring_fired"],
                             f"Пружина разжалась {'↑' if up else '↓'} — {tk}",
-                            f"Пробой диапазона после сжатия{vol}. Фаза: {r.get('cycle',{}).get('phase','')}.",
+                            f"Пробой диапазона после сжатия{vol}. "
+                            f"Фаза: {r.get('cycle',{}).get('phase','')}.{edge}",
                             "Удобрения v2", mult=1.3 if sp.get("vol_confirm") else 1.0))
         elif r.get("accumulation"):
             out.append(_sig("spring_loaded", f"${tk}", "bull",
@@ -188,9 +202,10 @@ def main():
     macro = _load("macro.json")
     cycles = _load("cycles.json")
 
+    backtest = _load("backtest.json")
     signals = []
     if fert:
-        from_fertilizers(fert, signals)
+        from_fertilizers(fert, signals, backtest)
     if insiders:
         from_insiders(insiders, signals)
     if funds:

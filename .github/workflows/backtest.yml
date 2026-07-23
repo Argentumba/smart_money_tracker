@@ -1,0 +1,42 @@
+name: Backtest Signals
+
+# Отдельный (удаляемый) слой бэктеста. Исторический edge меняется медленно,
+# поэтому раз в неделю — не жжём API-кредиты и не удлиняем ежедневный прогон.
+# Убрать слой: удали этот файл, scripts/backtest.py и вкладку «Бэктест».
+on:
+  schedule:
+    - cron: "0 6 * * 1"   # понедельник 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    env:
+      MARKETDATA_API_KEY: ${{ secrets.MARKETDATA_API_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Run signal backtest (event study)
+        run: python3 scripts/backtest.py
+        timeout-minutes: 8
+
+      - name: Commit backtest results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/data/backtest.json
+          if git diff --staged --quiet; then
+            echo "No changes."
+          else
+            git commit -m "chore: update signal backtest $(date -u +%Y-%m-%d)"
+            git push
+          fi
